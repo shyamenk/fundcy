@@ -1,23 +1,23 @@
-"use client";
+"use client"
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   BarChart3,
   TrendingUp,
@@ -30,10 +30,10 @@ import {
   Target,
   Clock,
   Activity,
-} from "lucide-react";
-import Link from "next/link";
-import { formatINR } from "@/lib/utils";
-import { format } from "date-fns";
+} from "lucide-react"
+import Link from "next/link"
+import { formatINR } from "@/lib/utils"
+import { format } from "date-fns"
 import {
   LineChart as RechartsLineChart,
   Line,
@@ -51,48 +51,52 @@ import {
   AreaChart,
   Area,
   LineChart,
-} from "recharts";
+} from "recharts"
+import {
+  exportCategoriesReportToPDF,
+  exportCategoriesReportToCSV,
+} from "@/lib/export/reports"
 
 interface CategoryReportData {
-  period: string;
-  totalSpent: number;
-  totalIncome: number;
+  period: string
+  totalSpent: number
+  totalIncome: number
   categoryBreakdown: Array<{
-    category: string;
-    totalAmount: number;
-    transactionCount: number;
-    averageAmount: number;
-    percentage: number;
+    category: string
+    totalAmount: number
+    transactionCount: number
+    averageAmount: number
+    percentage: number
     monthlyTrend: Array<{
-      month: string;
-      amount: number;
-      count: number;
-    }>;
-  }>;
+      month: string
+      amount: number
+      count: number
+    }>
+  }>
   topCategories: Array<{
-    category: string;
-    amount: number;
-    count: number;
-    percentage: number;
-  }>;
+    category: string
+    amount: number
+    count: number
+    percentage: number
+  }>
   monthlyTrends: Array<{
-    month: string;
-    totalSpent: number;
-    totalIncome: number;
-    netFlow: number;
+    month: string
+    totalSpent: number
+    totalIncome: number
+    netFlow: number
     categoryBreakdown: Array<{
-      category: string;
-      amount: number;
-    }>;
-  }>;
+      category: string
+      amount: number
+    }>
+  }>
   insights: {
-    mostExpensiveCategory: string;
-    mostFrequentCategory: string;
-    fastestGrowingCategory: string;
-    averageTransactionValue: number;
-    totalTransactions: number;
-    uniqueCategories: number;
-  };
+    mostExpensiveCategory: string
+    mostFrequentCategory: string
+    fastestGrowingCategory: string
+    averageTransactionValue: number
+    totalTransactions: number
+    uniqueCategories: number
+  }
 }
 
 const COLORS = [
@@ -106,35 +110,68 @@ const COLORS = [
   "#f97316",
   "#ec4899",
   "#6366f1",
-];
+]
 
 export default function CategoriesReportPage() {
-  const [months, setMonths] = useState(12);
-  const [data, setData] = useState<CategoryReportData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [months, setMonths] = useState(12)
+  const [data, setData] = useState<CategoryReportData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [exporting, setExporting] = useState<"pdf" | "csv" | null>(null)
 
   useEffect(() => {
-    fetchCategoryReport();
-  }, [months]);
+    fetchCategoryReport()
+  }, [months])
 
   const fetchCategoryReport = async () => {
     try {
-      setLoading(true);
-      const response = await fetch(`/api/reports/categories?months=${months}`);
-      const result = await response.json();
+      setLoading(true)
+      const response = await fetch(`/api/reports/categories?months=${months}`)
+      const result = await response.json()
 
       if (result.success) {
-        setData(result.data);
+        setData(result.data)
       } else {
-        setError(result.error || "Failed to fetch category report");
+        setError(result.error || "Failed to fetch category report")
       }
     } catch (err) {
-      setError("Failed to fetch category report");
+      setError("Failed to fetch category report")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
+
+  // Helper to adapt data for export
+  function getExportData() {
+    if (!data) throw new Error("No data to export")
+    // Adapt the structure to match CategoriesReportData
+    return {
+      period: data.period,
+      totalExpenses: data.totalSpent,
+      totalIncome: data.totalIncome,
+      categoryBreakdown: data.categoryBreakdown.map(cat => ({
+        category: cat.category,
+        amount: cat.totalAmount,
+        count: cat.transactionCount,
+        percentage: cat.percentage,
+        monthlyTrend: cat.monthlyTrend.map(mt => ({
+          month: mt.month,
+          amount: mt.amount,
+        })),
+      })),
+      topCategories: data.topCategories.map(cat => ({
+        category: cat.category,
+        amount: cat.amount,
+        percentage: cat.percentage,
+      })),
+      insights: {
+        highestSpendingMonth: "N/A", // Not available in current data
+        lowestSpendingMonth: "N/A", // Not available in current data
+        averageMonthlySpending: data.insights.averageTransactionValue || 0,
+        spendingGrowth: 0, // Not available in current data
+      },
+    }
+  }
 
   if (loading) {
     return (
@@ -156,7 +193,7 @@ export default function CategoriesReportPage() {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   if (error || !data) {
@@ -181,7 +218,7 @@ export default function CategoriesReportPage() {
           </CardContent>
         </Card>
       </div>
-    );
+    )
   }
 
   return (
@@ -218,9 +255,37 @@ export default function CategoriesReportPage() {
               <SelectItem value="24">Last 24 Months</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={exporting === "pdf" || !data}
+            onClick={async () => {
+              setExporting("pdf")
+              try {
+                if (data) exportCategoriesReportToPDF(getExportData())
+              } finally {
+                setExporting(null)
+              }
+            }}
+          >
             <Download className="w-4 h-4 mr-2" />
-            Export
+            {exporting === "pdf" ? "Exporting..." : "PDF"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={exporting === "csv" || !data}
+            onClick={async () => {
+              setExporting("csv")
+              try {
+                if (data) exportCategoriesReportToCSV(getExportData())
+              } finally {
+                setExporting(null)
+              }
+            }}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            {exporting === "csv" ? "Exporting..." : "CSV"}
           </Button>
         </div>
       </div>
@@ -599,5 +664,5 @@ export default function CategoriesReportPage() {
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }

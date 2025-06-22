@@ -1,23 +1,23 @@
-"use client";
+"use client"
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   BarChart3,
   TrendingUp,
@@ -27,10 +27,10 @@ import {
   DollarSign,
   ArrowLeft,
   Clock,
-} from "lucide-react";
-import Link from "next/link";
-import { formatINR } from "@/lib/utils";
-import { format } from "date-fns";
+} from "lucide-react"
+import Link from "next/link"
+import { formatINR } from "@/lib/utils"
+import { format } from "date-fns"
 import {
   LineChart as RechartsLineChart,
   Line,
@@ -47,60 +47,64 @@ import {
   Legend,
   AreaChart,
   Area,
-} from "recharts";
+} from "recharts"
+import {
+  exportMonthlyReportToPDF,
+  exportMonthlyReportToCSV,
+} from "@/lib/export/reports"
 
 interface MonthlyReportData {
-  year: number;
-  month: number;
-  monthName: string;
+  year: number
+  month: number
+  monthName: string
   totals: {
-    income: number;
-    expenses: number;
-    savings: number;
-    investments: number;
-  };
-  netFlow: number;
+    income: number
+    expenses: number
+    savings: number
+    investments: number
+  }
+  netFlow: number
   categoryBreakdown: Array<{
-    category: string;
-    amount: number;
-    count: number;
-    percentage: number;
-  }>;
+    category: string
+    amount: number
+    count: number
+    percentage: number
+  }>
   dailyBreakdown: Array<{
-    day: string;
-    income: number;
-    expenses: number;
-    savings: number;
-    investments: number;
-    netFlow: number;
-    transactionCount: number;
-  }>;
+    day: string
+    income: number
+    expenses: number
+    savings: number
+    investments: number
+    netFlow: number
+    transactionCount: number
+  }>
   weeklyBreakdown: Array<{
-    week: string;
-    income: number;
-    expenses: number;
-    savings: number;
-    investments: number;
-    netFlow: number;
-    transactionCount: number;
-  }>;
+    week: string
+    income: number
+    expenses: number
+    savings: number
+    investments: number
+    netFlow: number
+    transactionCount: number
+  }>
   topTransactions: Array<{
-    id: string;
-    amount: number;
-    type: string;
-    category: string;
-    description: string;
-    date: string;
-  }>;
+    id: string
+    amount: number
+    type: string
+    category: string
+    description: string
+    date: string
+  }>
   metrics: {
-    averageDailyIncome: number;
-    averageDailyExpenses: number;
-    averageDailySavings: number;
-    savingsRate: number;
-    expenseRatio: number;
-    totalTransactions: number;
-    daysWithTransactions: number;
-  };
+    averageDailyIncome: number
+    averageDailyExpenses: number
+    averageDailySavings: number
+    savingsRate: number
+    expenseRatio: number
+    totalTransactions: number
+    daysWithTransactions: number
+  }
 }
 
 const COLORS = [
@@ -114,46 +118,71 @@ const COLORS = [
   "#f97316",
   "#ec4899",
   "#6366f1",
-];
+]
 
 export default function MonthlyReportPage() {
-  const [year, setYear] = useState(new Date().getFullYear());
-  const [month, setMonth] = useState(new Date().getMonth() + 1);
-  const [data, setData] = useState<MonthlyReportData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [year, setYear] = useState(new Date().getFullYear())
+  const [month, setMonth] = useState(new Date().getMonth() + 1)
+  const [data, setData] = useState<MonthlyReportData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [exporting, setExporting] = useState<"pdf" | "csv" | null>(null)
 
   useEffect(() => {
-    fetchMonthlyReport();
-  }, [year, month]);
+    fetchMonthlyReport()
+  }, [year, month])
 
   const fetchMonthlyReport = async () => {
     try {
-      setLoading(true);
+      setLoading(true)
       const response = await fetch(
         `/api/reports/monthly?year=${year}&month=${month}`
-      );
-      const result = await response.json();
+      )
+      const result = await response.json()
 
       if (result.success) {
-        setData(result.data);
+        setData(result.data)
       } else {
-        setError(result.error || "Failed to fetch monthly report");
+        setError(result.error || "Failed to fetch monthly report")
       }
     } catch (err) {
-      setError("Failed to fetch monthly report");
+      setError("Failed to fetch monthly report")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const getGrowthIcon = (value: number) => {
-    return value >= 0 ? TrendingUp : TrendingDown;
-  };
+    return value >= 0 ? TrendingUp : TrendingDown
+  }
 
   const getGrowthColor = (value: number) => {
-    return value >= 0 ? "text-green-600" : "text-red-600";
-  };
+    return value >= 0 ? "text-green-600" : "text-red-600"
+  }
+
+  // Helper to adapt data for export
+  function getExportData() {
+    if (!data) throw new Error("No data to export")
+    // Map dailyBreakdown to dailyTrends for export compatibility
+    // Fill in missing metrics fields with defaults if needed
+    return {
+      ...data,
+      dailyTrends: data.dailyBreakdown.map(day => ({
+        date: day.day,
+        income: day.income,
+        expenses: day.expenses,
+        netFlow: day.netFlow,
+      })),
+      metrics: {
+        averageDailyIncome: data.metrics.averageDailyIncome,
+        averageDailyExpenses: data.metrics.averageDailyExpenses,
+        totalTransactions: data.metrics.totalTransactions,
+        mostExpensiveDay: (data.metrics as any).mostExpensiveDay || "",
+        mostExpensiveCategory:
+          (data.metrics as any).mostExpensiveCategory || "",
+      },
+    }
+  }
 
   if (loading) {
     return (
@@ -173,7 +202,7 @@ export default function MonthlyReportPage() {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   if (error || !data) {
@@ -198,7 +227,7 @@ export default function MonthlyReportPage() {
           </CardContent>
         </Card>
       </div>
-    );
+    )
   }
 
   return (
@@ -255,9 +284,37 @@ export default function MonthlyReportPage() {
               ))}
             </SelectContent>
           </Select>
-          <Button variant="outline" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={exporting === "pdf" || !data}
+            onClick={async () => {
+              setExporting("pdf")
+              try {
+                if (data) exportMonthlyReportToPDF(getExportData())
+              } finally {
+                setExporting(null)
+              }
+            }}
+          >
             <Download className="w-4 h-4 mr-2" />
-            Export
+            {exporting === "pdf" ? "Exporting..." : "PDF"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={exporting === "csv" || !data}
+            onClick={async () => {
+              setExporting("csv")
+              try {
+                if (data) exportMonthlyReportToCSV(getExportData())
+              } finally {
+                setExporting(null)
+              }
+            }}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            {exporting === "csv" ? "Exporting..." : "CSV"}
           </Button>
         </div>
       </div>
@@ -543,10 +600,11 @@ export default function MonthlyReportPage() {
                     </div>
                     <div className="text-right">
                       <div
-                        className={`font-semibold ${transaction.type === "income"
-                          ? "text-green-600"
-                          : "text-red-600"
-                          }`}
+                        className={`font-semibold ${
+                          transaction.type === "income"
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
                       >
                         {transaction.type === "income" ? "+" : "-"}
                         {formatINR(transaction.amount)}
@@ -563,5 +621,5 @@ export default function MonthlyReportPage() {
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }

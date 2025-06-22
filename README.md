@@ -10,6 +10,7 @@ A comprehensive personal finance management application built with Next.js 14+, 
 ## ✨ Features
 
 ### 📊 Dashboard Overview
+
 - **Real-time Financial Summary**: Income, expenses, savings, and investments at a glance
 - **Net Worth Calculation**: Automatic calculation of your financial position
 - **Recent Transactions**: Quick view of your latest financial activities
@@ -17,6 +18,7 @@ A comprehensive personal finance management application built with Next.js 14+, 
 - **Quick Actions**: Easy access to add new transactions and goals
 
 ### 💰 Transaction Management
+
 - **Multiple Transaction Types**: Income, expenses, savings, and investments
 - **Comprehensive Categories**: Pre-defined categories with custom support
 - **Advanced Filtering**: Search and filter transactions by date, category, amount
@@ -24,6 +26,7 @@ A comprehensive personal finance management application built with Next.js 14+, 
 - **Form Validation**: Robust client and server-side validation
 
 ### 🎯 Goal Management
+
 - **Financial Goal Setting**: Create targets with amounts and deadlines
 - **Progress Tracking**: Visual progress bars and percentage completion
 - **Goal Categories**: Emergency fund, vacation, house down payment, debt payoff
@@ -31,6 +34,7 @@ A comprehensive personal finance management application built with Next.js 14+, 
 - **Goal Completion**: Mark goals as completed with celebration feedback
 
 ### 📈 Advanced Analytics & Reports
+
 - **Annual Reports**: Comprehensive yearly financial analysis
 - **Monthly Breakdowns**: Detailed monthly spending and income patterns
 - **Category Analysis**: Deep dive into spending patterns by category
@@ -39,6 +43,7 @@ A comprehensive personal finance management application built with Next.js 14+, 
 - **Export Functionality**: Download reports in various formats
 
 ### 🏷️ Category Management
+
 - **Pre-defined Categories**: Comprehensive set of financial categories
 - **Custom Categories**: Create your own categories as needed
 - **Category Colors**: Visual organization with color-coded categories
@@ -47,6 +52,7 @@ A comprehensive personal finance management application built with Next.js 14+, 
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Framework**: Next.js 14+ (App Router)
 - **Language**: TypeScript (strict mode)
 - **Styling**: Tailwind CSS + shadcn/ui components
@@ -55,12 +61,14 @@ A comprehensive personal finance management application built with Next.js 14+, 
 - **Charts**: Recharts for data visualization
 
 ### Backend
+
 - **Runtime**: Node.js (Next.js API routes)
 - **Database**: PostgreSQL (Neon serverless)
 - **ORM**: Drizzle ORM with Drizzle Kit
 - **Validation**: Zod schemas (shared between client and server)
 
 ### Development & Deployment
+
 - **Package Manager**: pnpm (recommended) or npm
 - **Deployment**: Vercel (recommended)
 - **Database**: Neon (PostgreSQL serverless)
@@ -68,19 +76,22 @@ A comprehensive personal finance management application built with Next.js 14+, 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - pnpm (recommended) or npm
 - PostgreSQL database (Neon recommended)
 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/yourusername/personal-finance-tracker.git
    cd personal-finance-tracker
    ```
 
 2. **Install dependencies**
+
    ```bash
    pnpm install
    # or
@@ -88,15 +99,17 @@ A comprehensive personal finance management application built with Next.js 14+, 
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env.local
    ```
-   
+
    Update `.env.local` with your configuration:
+
    ```env
    # Database
    DATABASE_URL=postgresql://username:password@host:port/database
-   
+
    # App Configuration
    NODE_ENV=development
    NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -104,16 +117,18 @@ A comprehensive personal finance management application built with Next.js 14+, 
    ```
 
 4. **Set up the database**
+
    ```bash
    # Generate and run migrations
    pnpm db:generate
    pnpm db:migrate
-   
+
    # (Optional) Seed with sample data
    pnpm db:seed
    ```
 
 5. **Start the development server**
+
    ```bash
    pnpm dev
    ```
@@ -167,6 +182,7 @@ fin/
 - **goal_contributions**: Track contributions to goals
 
 ### Key Features
+
 - **Type Safety**: Full TypeScript coverage
 - **Data Integrity**: Foreign key constraints and validations
 - **Performance**: Optimized queries and indexing
@@ -175,10 +191,12 @@ fin/
 ## 📊 API Endpoints
 
 ### Dashboard
+
 - `GET /api/dashboard` - Dashboard overview data
 - `GET /api/dashboard/net-worth` - Net worth calculation
 
 ### Transactions
+
 - `GET /api/transactions` - Get all transactions (with pagination)
 - `POST /api/transactions` - Create new transaction
 - `GET /api/transactions/[id]` - Get transaction by ID
@@ -186,6 +204,7 @@ fin/
 - `DELETE /api/transactions/[id]` - Delete transaction
 
 ### Goals
+
 - `GET /api/goals` - Get all goals
 - `POST /api/goals` - Create new goal
 - `GET /api/goals/[id]` - Get goal by ID
@@ -194,6 +213,7 @@ fin/
 - `POST /api/goals/[id]/complete` - Mark goal as completed
 
 ### Reports
+
 - `GET /api/reports/annual` - Annual report data
 - `GET /api/reports/monthly` - Monthly breakdown
 - `GET /api/reports/categories` - Category-wise analysis
@@ -320,4 +340,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Built with ❤️ using Next.js, TypeScript, and PostgreSQL**
 
-*Last updated: June 2025*
+_Last updated: June 2025_

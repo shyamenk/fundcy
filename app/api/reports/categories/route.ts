@@ -67,7 +67,10 @@ export async function GET(request: NextRequest) {
       .orderBy(desc(transactions.date))
 
     // Calculate total income
-    const totalIncome = incomeTransactions.reduce((sum, t) => sum + Number(t.amount), 0)
+    const totalIncome = incomeTransactions.reduce(
+      (sum, t) => sum + Number(t.amount),
+      0
+    )
 
     // Calculate category totals
     const categoryTotals = new Map<
@@ -226,12 +229,13 @@ export async function GET(request: NextRequest) {
       totalAmount: category.amount,
       transactionCount: category.count,
       averageAmount: category.averageAmount,
-      percentage: totalExpenses > 0 ? (category.amount / totalExpenses) * 100 : 0,
+      percentage:
+        totalExpenses > 0 ? (category.amount / totalExpenses) * 100 : 0,
       monthlyTrend: category.monthlyBreakdown.map(month => ({
         month: month.month,
         amount: month.amount,
         count: 0, // We don't track count per month in current implementation
-      }))
+      })),
     }))
 
     // Create topCategories (top 5 by amount)
@@ -239,7 +243,8 @@ export async function GET(request: NextRequest) {
       category: category.name,
       amount: category.amount,
       count: category.count,
-      percentage: totalExpenses > 0 ? (category.amount / totalExpenses) * 100 : 0,
+      percentage:
+        totalExpenses > 0 ? (category.amount / totalExpenses) * 100 : 0,
     }))
 
     // Transform monthlyBreakdown to monthlyTrends
@@ -251,14 +256,17 @@ export async function GET(request: NextRequest) {
       categoryBreakdown: month.categories.map((cat: any) => ({
         category: cat.name,
         amount: cat.amount,
-      }))
+      })),
     }))
 
     // Calculate insights
     const mostExpensiveCategory = categoryData[0]?.name || "None"
-    const mostFrequentCategory = categoryData.reduce((a, b) => a.count > b.count ? a : b)?.name || "None"
-    const fastestGrowingCategory = trends.find((t: any) => t.trend === "increasing")?.name || "None"
-    const averageTransactionValue = totalTransactions > 0 ? totalExpenses / totalTransactions : 0
+    const mostFrequentCategory =
+      categoryData.reduce((a, b) => (a.count > b.count ? a : b))?.name || "None"
+    const fastestGrowingCategory =
+      trends.find((t: any) => t.trend === "increasing")?.name || "None"
+    const averageTransactionValue =
+      totalTransactions > 0 ? totalExpenses / totalTransactions : 0
     const uniqueCategories = categoryData.length
 
     return NextResponse.json({

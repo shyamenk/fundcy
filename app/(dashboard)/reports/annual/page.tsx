@@ -1,23 +1,23 @@
-"use client";
+"use client"
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   BarChart3,
   TrendingUp,
@@ -29,10 +29,10 @@ import {
   PieChart,
   LineChart,
   ArrowLeft,
-} from "lucide-react";
-import Link from "next/link";
-import { formatINR } from "@/lib/utils";
-import { format } from "date-fns";
+} from "lucide-react"
+import Link from "next/link"
+import { formatINR } from "@/lib/utils"
+import { format } from "date-fns"
 import {
   LineChart as RechartsLineChart,
   Line,
@@ -47,38 +47,42 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-} from "recharts";
+} from "recharts"
+import {
+  exportAnnualReportToPDF,
+  exportAnnualReportToCSV,
+} from "@/lib/export/reports"
 
 interface AnnualReportData {
-  year: number;
+  year: number
   totals: {
-    income: number;
-    expenses: number;
-    savings: number;
-    investments: number;
-  };
-  netWorthChange: number;
+    income: number
+    expenses: number
+    savings: number
+    investments: number
+  }
+  netWorthChange: number
   categoryBreakdown: Array<{
-    category: string;
-    amount: number;
-    count: number;
-    percentage: number;
-  }>;
+    category: string
+    amount: number
+    count: number
+    percentage: number
+  }>
   monthlyBreakdown: Array<{
-    month: string;
-    income: number;
-    expenses: number;
-    savings: number;
-    investments: number;
-    netFlow: number;
-  }>;
+    month: string
+    income: number
+    expenses: number
+    savings: number
+    investments: number
+    netFlow: number
+  }>
   metrics: {
-    averageMonthlyIncome: number;
-    averageMonthlyExpenses: number;
-    savingsRate: number;
-    expenseRatio: number;
-    totalTransactions: number;
-  };
+    averageMonthlyIncome: number
+    averageMonthlyExpenses: number
+    savingsRate: number
+    expenseRatio: number
+    totalTransactions: number
+  }
 }
 
 const COLORS = [
@@ -92,43 +96,44 @@ const COLORS = [
   "#f97316",
   "#ec4899",
   "#6366f1",
-];
+]
 
 export default function AnnualReportPage() {
-  const [year, setYear] = useState(new Date().getFullYear());
-  const [data, setData] = useState<AnnualReportData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [year, setYear] = useState(new Date().getFullYear())
+  const [data, setData] = useState<AnnualReportData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [exporting, setExporting] = useState<"pdf" | "csv" | null>(null)
 
   useEffect(() => {
-    fetchAnnualReport();
-  }, [year]);
+    fetchAnnualReport()
+  }, [year])
 
   const fetchAnnualReport = async () => {
     try {
-      setLoading(true);
-      const response = await fetch(`/api/reports/annual?year=${year}`);
-      const result = await response.json();
+      setLoading(true)
+      const response = await fetch(`/api/reports/annual?year=${year}`)
+      const result = await response.json()
 
       if (result.success) {
-        setData(result.data);
+        setData(result.data)
       } else {
-        setError(result.error || "Failed to fetch annual report");
+        setError(result.error || "Failed to fetch annual report")
       }
     } catch (err) {
-      setError("Failed to fetch annual report");
+      setError("Failed to fetch annual report")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const getGrowthIcon = (value: number) => {
-    return value >= 0 ? TrendingUp : TrendingDown;
-  };
+    return value >= 0 ? TrendingUp : TrendingDown
+  }
 
   const getGrowthColor = (value: number) => {
-    return value >= 0 ? "text-green-600" : "text-red-600";
-  };
+    return value >= 0 ? "text-green-600" : "text-red-600"
+  }
 
   if (loading) {
     return (
@@ -148,7 +153,7 @@ export default function AnnualReportPage() {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   if (error || !data) {
@@ -173,7 +178,7 @@ export default function AnnualReportPage() {
           </CardContent>
         </Card>
       </div>
-    );
+    )
   }
 
   return (
@@ -215,9 +220,37 @@ export default function AnnualReportPage() {
               ))}
             </SelectContent>
           </Select>
-          <Button variant="outline" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={exporting === "pdf"}
+            onClick={async () => {
+              setExporting("pdf")
+              try {
+                exportAnnualReportToPDF(data)
+              } finally {
+                setExporting(null)
+              }
+            }}
+          >
             <Download className="w-4 h-4 mr-2" />
-            Export
+            {exporting === "pdf" ? "Exporting..." : "PDF"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={exporting === "csv"}
+            onClick={async () => {
+              setExporting("csv")
+              try {
+                exportAnnualReportToCSV(data)
+              } finally {
+                setExporting(null)
+              }
+            }}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            {exporting === "csv" ? "Exporting..." : "CSV"}
           </Button>
         </div>
       </div>
@@ -479,5 +512,5 @@ export default function AnnualReportPage() {
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }

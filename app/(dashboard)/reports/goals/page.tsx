@@ -1,23 +1,23 @@
-"use client";
+"use client"
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   BarChart3,
   TrendingUp,
@@ -34,10 +34,10 @@ import {
   AlertCircle,
   Pause,
   Play,
-} from "lucide-react";
-import Link from "next/link";
-import { formatINR } from "@/lib/utils";
-import { format } from "date-fns";
+} from "lucide-react"
+import Link from "next/link"
+import { formatINR } from "@/lib/utils"
+import { format } from "date-fns"
 import {
   LineChart as RechartsLineChart,
   Line,
@@ -54,59 +54,63 @@ import {
   Legend,
   AreaChart,
   Area,
-} from "recharts";
+} from "recharts"
+import {
+  exportGoalsReportToPDF,
+  exportGoalsReportToCSV,
+} from "@/lib/export/reports"
 
 interface GoalReportData {
-  period: string;
+  period: string
   goalStats: {
-    total: number;
-    active: number;
-    completed: number;
-    paused: number;
-    totalTargetAmount: number;
-    totalCurrentAmount: number;
-    totalContributions: number;
-  };
-  overallProgress: number;
+    total: number
+    active: number
+    completed: number
+    paused: number
+    totalTargetAmount: number
+    totalCurrentAmount: number
+    totalContributions: number
+  }
+  overallProgress: number
   goalProgress: Array<{
-    id: string;
-    title: string;
-    category: string;
-    status: string;
-    targetAmount: number;
-    currentAmount: number;
-    progress: number;
-    remaining: number;
-    isOverdue: boolean;
-    targetDate: string | null;
-    createdAt: string;
-    completedAt: string | null;
-  }>;
+    id: string
+    title: string
+    category: string
+    status: string
+    targetAmount: number
+    currentAmount: number
+    progress: number
+    remaining: number
+    isOverdue: boolean
+    targetDate: string | null
+    createdAt: string
+    completedAt: string | null
+  }>
   monthlyContributions: Array<{
-    month: string;
-    total: number;
-    count: number;
+    month: string
+    total: number
+    count: number
     goals: Array<{
-      title: string;
-      amount: number;
-    }>;
-  }>;
+      title: string
+      amount: number
+    }>
+  }>
   categoryBreakdown: Array<{
-    category: string;
-    count: number;
-    totalTarget: number;
-    totalCurrent: number;
-    totalContributions: number;
-    averageProgress: number;
-  }>;
+    category: string
+    count: number
+    totalTarget: number
+    totalCurrent: number
+    totalContributions: number
+    averageProgress: number
+  }>
   insights: {
-    mostActiveCategory: string;
-    fastestProgressingGoal: string;
-    mostOverdueGoal: string;
-    averageGoalValue: number;
-    completionRate: number;
-    averageMonthlyContribution: number;
-  };
+    mostActiveCategory: string
+    fastestProgressingGoal: string
+    mostOverdueGoal: string
+    averageGoalValue: number
+    completionRate: number
+    averageMonthlyContribution: number
+  }
 }
 
 const COLORS = [
@@ -120,64 +124,106 @@ const COLORS = [
   "#f97316",
   "#ec4899",
   "#6366f1",
-];
+]
 
 const STATUS_COLORS = {
   active: "text-green-600",
   completed: "text-blue-600",
   paused: "text-yellow-600",
-};
+}
 
 const STATUS_ICONS = {
   active: Play,
   completed: CheckCircle,
   paused: Pause,
-};
+}
 
 export default function GoalsReportPage() {
-  const [year, setYear] = useState(new Date().getFullYear());
-  const [status, setStatus] = useState<string>("all");
-  const [data, setData] = useState<GoalReportData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [year, setYear] = useState(new Date().getFullYear())
+  const [status, setStatus] = useState<string>("all")
+  const [data, setData] = useState<GoalReportData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [exporting, setExporting] = useState<"pdf" | "csv" | null>(null)
 
   useEffect(() => {
-    fetchGoalsReport();
-  }, [year, status]);
+    fetchGoalsReport()
+  }, [year, status])
 
   const fetchGoalsReport = async () => {
     try {
-      setLoading(true);
+      setLoading(true)
       const params = new URLSearchParams({
         year: year.toString(),
         ...(status !== "all" && { status }),
-      });
-      const response = await fetch(`/api/reports/goals?${params}`);
-      const result = await response.json();
+      })
+      const response = await fetch(`/api/reports/goals?${params}`)
+      const result = await response.json()
 
       if (result.success) {
-        setData(result.data);
+        setData(result.data)
       } else {
-        setError(result.error || "Failed to fetch goals report");
+        setError(result.error || "Failed to fetch goals report")
       }
     } catch (err) {
-      setError("Failed to fetch goals report");
+      setError("Failed to fetch goals report")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const getStatusColor = (status: string) => {
     return (
       STATUS_COLORS[status as keyof typeof STATUS_COLORS] || "text-gray-600"
-    );
-  };
+    )
+  }
 
   const getStatusIcon = (status: string) => {
     const Icon =
-      STATUS_ICONS[status as keyof typeof STATUS_ICONS] || AlertCircle;
-    return <Icon className="w-4 h-4" />;
-  };
+      STATUS_ICONS[status as keyof typeof STATUS_ICONS] || AlertCircle
+    return <Icon className="w-4 h-4" />
+  }
+
+  // Helper to adapt data for export
+  function getExportData() {
+    if (!data) throw new Error("No data to export")
+    // Adapt the structure to match GoalsReportData
+    return {
+      period: data.period || `${year}`,
+      totalGoals: data.goalStats?.total ?? 0,
+      completedGoals: data.goalStats?.completed ?? 0,
+      activeGoals: data.goalStats?.active ?? 0,
+      totalTargetAmount: data.goalStats?.totalTargetAmount ?? 0,
+      totalCurrentAmount: data.goalStats?.totalCurrentAmount ?? 0,
+      goals: data.goalProgress.map(goal => ({
+        id: goal.id,
+        title: goal.title,
+        targetAmount: goal.targetAmount,
+        currentAmount: goal.currentAmount,
+        progress: goal.progress,
+        status: goal.status,
+        targetDate: goal.targetDate,
+        category: goal.category,
+      })),
+      categoryBreakdown: data.categoryBreakdown.map(cat => ({
+        category: cat.category,
+        count: cat.count,
+        totalTarget: cat.totalTarget,
+        totalCurrent: cat.totalCurrent,
+        averageProgress: cat.averageProgress,
+      })),
+      insights: {
+        completionRate: data.insights.completionRate ?? 0,
+        averageProgress:
+          data.categoryBreakdown.reduce(
+            (sum, c) => sum + (c.averageProgress ?? 0),
+            0
+          ) / (data.categoryBreakdown.length || 1),
+        totalContributed: data.goalStats?.totalContributions ?? 0,
+        projectedCompletion: "N/A", // Not available in current data
+      },
+    }
+  }
 
   if (loading) {
     return (
@@ -197,7 +243,7 @@ export default function GoalsReportPage() {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   if (error || !data) {
@@ -222,7 +268,7 @@ export default function GoalsReportPage() {
           </CardContent>
         </Card>
       </div>
-    );
+    )
   }
 
   return (
@@ -275,6 +321,38 @@ export default function GoalsReportPage() {
               <SelectItem value="paused">Paused</SelectItem>
             </SelectContent>
           </Select>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={exporting === "pdf" || !data}
+            onClick={async () => {
+              setExporting("pdf")
+              try {
+                if (data) exportGoalsReportToPDF(getExportData())
+              } finally {
+                setExporting(null)
+              }
+            }}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            {exporting === "pdf" ? "Exporting..." : "PDF"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={exporting === "csv" || !data}
+            onClick={async () => {
+              setExporting("csv")
+              try {
+                if (data) exportGoalsReportToCSV(getExportData())
+              } finally {
+                setExporting(null)
+              }
+            }}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            {exporting === "csv" ? "Exporting..." : "CSV"}
+          </Button>
         </div>
       </div>
 
@@ -759,5 +837,5 @@ export default function GoalsReportPage() {
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }
