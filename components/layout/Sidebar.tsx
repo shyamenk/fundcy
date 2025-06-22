@@ -1,8 +1,8 @@
-import React from "react";
-import Link from "next/link";
-import { Home, Landmark, BarChart2, Settings } from "lucide-react";
+import React from "react"
+import Link from "next/link"
+import { Home, Landmark, BarChart2, Settings, Goal } from "lucide-react"
 
-export const MainNav = ({ className }: { className?: string; }) => {
+export const MainNav = ({ className }: { className?: string }) => {
   return (
     <nav className={className}>
       <Link
@@ -23,6 +23,13 @@ export const MainNav = ({ className }: { className?: string; }) => {
         href="/reports"
         className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
       >
+        <Goal className="h-4 w-4" />
+        Goals
+      </Link>
+      <Link
+        href="/reports"
+        className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+      >
         <BarChart2 className="h-4 w-4" />
         Reports
       </Link>
@@ -34,8 +41,8 @@ export const MainNav = ({ className }: { className?: string; }) => {
         Settings
       </Link>
     </nav>
-  );
-};
+  )
+}
 
 const Sidebar = () => {
   return (
@@ -52,7 +59,7 @@ const Sidebar = () => {
         </div>
       </div>
     </aside>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar

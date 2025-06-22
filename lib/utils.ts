@@ -11,19 +11,22 @@ export function cn(...inputs: ClassValue[]) {
  * @param showDecimals - Whether to show decimal places (default: false)
  * @returns Formatted INR string with ₹ symbol
  */
-export function formatINR(amount: number, showDecimals: boolean = false): string {
-  const formatter = new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
+export function formatINR(
+  amount: number,
+  showDecimals: boolean = false
+): string {
+  const formatter = new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
     minimumFractionDigits: showDecimals ? 2 : 0,
     maximumFractionDigits: showDecimals ? 2 : 0,
-  });
-  
+  })
+
   // Extract the formatted number without the currency symbol
-  const formattedNumber = formatter.format(amount).replace('₹', '').trim();
-  
+  const formattedNumber = formatter.format(amount).replace("₹", "").trim()
+
   // Return with custom ₹ symbol formatting
-  return `₹${formattedNumber}`;
+  return `₹${formattedNumber}`
 }
 
 /**
@@ -33,12 +36,12 @@ export function formatINR(amount: number, showDecimals: boolean = false): string
  */
 export function formatCompactINR(amount: number): string {
   if (amount >= 10000000) {
-    return `₹${(amount / 10000000).toFixed(1)}Cr`;
+    return `₹${(amount / 10000000).toFixed(1)}Cr`
   } else if (amount >= 100000) {
-    return `₹${(amount / 100000).toFixed(1)}L`;
+    return `₹${(amount / 100000).toFixed(1)}L`
   } else if (amount >= 1000) {
-    return `₹${(amount / 1000).toFixed(1)}K`;
+    return `₹${(amount / 1000).toFixed(1)}K`
   } else {
-    return formatINR(amount);
+    return formatINR(amount)
   }
 }

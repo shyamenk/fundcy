@@ -149,14 +149,15 @@
 - [x] Build edit transaction page (/transactions/[id])
 - [x] Add pagination for transaction list
 - [ ] Implement bulk operations (delete multiple)
-- [ ] Add export functionality (CSV/PDF)
+- [ ] Create transaction filters sidebar
+- [x] Add export functionality (CSV/PDF)
 
 #### Acceptance Criteria:
 
 - [x] All transaction pages functional
 - [x] Pagination working properly
 - [ ] Bulk operations implemented
-- [ ] Export features working
+- [x] Export features working
 
 ---
 
@@ -173,18 +174,21 @@
 - [x] Create dashboard API endpoints:
   - [x] GET /api/dashboard (overview data)
   - [x] GET /api/dashboard/net-worth
+  - [x] GET /api/dashboard/chart (money flow data)
 - [x] Implement financial calculation utilities:
   - [x] Net worth calculation (Assets - Liabilities)
   - [x] Category totals calculation
   - [x] Monthly/Annual summaries
 - [x] Create custom React hooks for dashboard data
 - [x] Implement real-time data updates
+- [x] Add sample transaction data for testing
 
 #### Acceptance Criteria:
 
 - [x] Dashboard API returning accurate calculations
 - [x] Financial calculations properly implemented
 - [x] Real-time updates working
+- [x] Chart data using real database values
 
 ---
 
@@ -197,7 +201,7 @@
 - [x] Create "My Balance" card component
 - [x] Create "My Income" card component
 - [x] Create "Total Expense" card component
-- [ ] Create "Money Flow" chart component
+- [x] Create "Money Flow" chart component
 - [x] Create "Remaining Monthly" and "Budget" components
 - [x] Create "Transaction History" table component for dashboard preview
 - [x] Assemble dashboard page with a responsive grid layout based on the design
@@ -218,26 +222,26 @@
 
 #### Subtasks:
 
-- [ ] Create goal data models and validation schemas
-- [ ] Implement goal API endpoints:
-  - [ ] GET /api/goals
-  - [ ] POST /api/goals
-  - [ ] GET /api/goals/[id]
-  - [ ] PUT /api/goals/[id]
-  - [ ] DELETE /api/goals/[id]
-  - [ ] POST /api/goals/[id]/complete
-- [ ] Build goal creation form
-- [ ] Create goal card component with progress visualization
-- [ ] Implement goal progress calculation logic
-- [ ] Add goal completion functionality
-- [ ] Create goals management page
+- [x] Create goal data models and validation schemas
+- [x] Implement goal API endpoints:
+  - [x] GET /api/goals
+  - [x] POST /api/goals
+  - [x] GET /api/goals/[id]
+  - [x] PUT /api/goals/[id]
+  - [x] DELETE /api/goals/[id]
+  - [x] POST /api/goals/[id]/complete
+- [x] Build goal creation form
+- [x] Create goal card component with progress visualization
+- [x] Implement goal progress calculation logic
+- [x] Add goal completion functionality
+- [x] Create goals management page
 
 #### Acceptance Criteria:
 
-- [ ] Goal CRUD operations working
-- [ ] Progress tracking accurate
-- [ ] Visual progress indicators functional
-- [ ] Goal completion flow working
+- [x] Goal CRUD operations working
+- [x] Progress tracking accurate
+- [x] Visual progress indicators functional
+- [x] Goal completion flow working
 
 ---
 

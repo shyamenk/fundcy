@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { TransactionListWrapper } from "@/components/transactions/TransactionListWrapper"
+import { ExportControls } from "@/components/transactions/ExportControls"
 import { getTransactions } from "@/lib/server-actions/transactions"
 import Link from "next/link"
 
@@ -33,12 +34,15 @@ export default async function TransactionsPage({
             Manage your income, expenses, savings, and investments
           </p>
         </div>
-        <Link href="/transactions/add">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Transaction
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <ExportControls transactions={transactions} />
+          <Link href="/transactions/add">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Transaction
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Transaction List */}

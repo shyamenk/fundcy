@@ -1,33 +1,40 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
-import { PeriodSelector, PeriodType } from './PeriodSelector';
-import { useDashboard } from '@/hooks/useDashboard';
+import { useState } from "react"
+import { PeriodSelector, PeriodType } from "./PeriodSelector"
+import { useDashboard } from "@/hooks/useDashboard"
 
 interface DashboardHeaderProps {
-  className?: string;
+  className?: string
 }
 
 export function DashboardHeader({ className }: DashboardHeaderProps) {
-  const [period, setPeriod] = useState<PeriodType>('month');
-  const [customDate, setCustomDate] = useState<Date>(new Date());
+  const [period, setPeriod] = useState<PeriodType>("month")
+  const [customDate, setCustomDate] = useState<Date>(new Date())
 
-  const { data, loading, error } = useDashboard(period, period === 'custom' ? customDate : undefined);
+  const { data, loading, error } = useDashboard(
+    period,
+    period === "custom" ? customDate : undefined
+  )
 
   const handlePeriodChange = (newPeriod: PeriodType) => {
-    setPeriod(newPeriod);
-  };
+    setPeriod(newPeriod)
+  }
 
   const handleDateChange = (date: Date) => {
-    setCustomDate(date);
-  };
+    setCustomDate(date)
+  }
 
   return (
     <div className={`flex items-center justify-between ${className}`}>
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">
-          {loading ? 'Loading...' : error ? 'Error loading data' : 'Your financial overview'}
+          {loading
+            ? "Loading..."
+            : error
+              ? "Error loading data"
+              : "Your financial overview"}
         </p>
       </div>
 
@@ -40,5 +47,5 @@ export function DashboardHeader({ className }: DashboardHeaderProps) {
         />
       </div>
     </div>
-  );
-} 
+  )
+}

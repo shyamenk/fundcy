@@ -129,46 +129,50 @@ export function useNetWorth(months: number = 12) {
 }
 
 // Hook for real-time updates (polling every 30 seconds)
-export function useRealtimeDashboard(period: PeriodType = 'month', customDate?: Date, interval: number = 30000) {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export function useRealtimeDashboard(
+  period: PeriodType = "month",
+  customDate?: Date,
+  interval: number = 30000
+) {
+  const [data, setData] = useState<DashboardData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const fetchData = async () => {
     try {
-      const params = new URLSearchParams({ period });
-      if (period === 'custom' && customDate) {
-        const dateString = customDate.toISOString().slice(0, 7); // YYYY-MM format
-        params.append('customDate', dateString);
+      const params = new URLSearchParams({ period })
+      if (period === "custom" && customDate) {
+        const dateString = customDate.toISOString().slice(0, 7) // YYYY-MM format
+        params.append("customDate", dateString)
       }
-      
-      const response = await fetch(`/api/dashboard?${params.toString()}`);
-      const result = await response.json();
-      
+
+      const response = await fetch(`/api/dashboard?${params.toString()}`)
+      const result = await response.json()
+
       if (!result.success) {
-        throw new Error(result.error || 'Failed to fetch dashboard data');
+        throw new Error(result.error || "Failed to fetch dashboard data")
       }
-      
-      setData(result.data);
-      setError(null);
+
+      setData(result.data)
+      setError(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchData();
-    
-    const intervalId = setInterval(fetchData, interval);
-    
-    return () => clearInterval(intervalId);
-  }, [period, customDate, interval]);
+    fetchData()
+
+    const intervalId = setInterval(fetchData, interval)
+
+    return () => clearInterval(intervalId)
+  }, [period, customDate, interval])
 
   return {
     data,
     loading,
-    error
-  };
+    error,
+  }
 }

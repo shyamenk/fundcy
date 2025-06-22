@@ -1,13 +1,13 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LucideIcon, TrendingUp, TrendingDown } from "lucide-react";
-import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { LucideIcon, TrendingUp, TrendingDown } from "lucide-react"
+import React from "react"
 
 interface StatCardProps {
-  title: string;
-  value: string;
-  description: string;
-  icon: LucideIcon;
-  trend?: 'positive' | 'negative' | undefined;
+  title: string
+  value: string
+  description: string
+  icon: LucideIcon
+  trend?: "positive" | "negative" | undefined
 }
 
 export const StatCard = ({
@@ -18,19 +18,21 @@ export const StatCard = ({
   trend,
 }: StatCardProps) => {
   const getTrendIcon = () => {
-    if (trend === 'positive') return <TrendingUp className="h-4 w-4 text-green-600" />;
-    if (trend === 'negative') return <TrendingDown className="h-4 w-4 text-red-600" />;
-    return null;
-  };
+    if (trend === "positive")
+      return <TrendingUp className="h-4 w-4 text-green-600" />
+    if (trend === "negative")
+      return <TrendingDown className="h-4 w-4 text-red-600" />
+    return null
+  }
 
   const getTrendColor = () => {
-    if (trend === 'positive') return 'text-green-600';
-    if (trend === 'negative') return 'text-red-600';
-    return '';
-  };
+    if (trend === "positive") return "text-green-600"
+    if (trend === "negative") return "text-red-600"
+    return ""
+  }
 
   // Check if value contains INR symbol for special styling
-  const isINR = value.includes('₹');
+  const isINR = value.includes("₹")
 
   return (
     <Card>
@@ -46,7 +48,7 @@ export const StatCard = ({
           {isINR ? (
             <span className="flex items-baseline gap-1">
               <span className="text-xl font-bold text-foreground">₹</span>
-              <span>{value.replace('₹', '')}</span>
+              <span>{value.replace("₹", "")}</span>
             </span>
           ) : (
             value
@@ -55,5 +57,5 @@ export const StatCard = ({
         <p className="text-xs text-muted-foreground">{description}</p>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
