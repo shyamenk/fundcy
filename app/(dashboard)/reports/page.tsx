@@ -1,10 +1,16 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   BarChart3,
   Calendar,
@@ -15,18 +21,19 @@ import {
   ArrowRight,
   PieChart,
   LineChart,
-  Activity
-} from "lucide-react";
-import Link from "next/link";
+  Activity,
+} from "lucide-react"
+import Link from "next/link"
 
 export default function ReportsPage() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("overview")
 
   const reportTypes = [
     {
       id: "annual",
       title: "Annual Reports",
-      description: "Comprehensive yearly financial analysis with trends and insights",
+      description:
+        "Comprehensive yearly financial analysis with trends and insights",
       icon: BarChart3,
       color: "text-blue-600",
       bgColor: "bg-blue-50 dark:bg-blue-950",
@@ -34,9 +41,9 @@ export default function ReportsPage() {
         "Year-over-year comparison",
         "Category spending analysis",
         "Net worth progression",
-        "Savings rate tracking"
+        "Savings rate tracking",
       ],
-      href: "/reports/annual"
+      href: "/reports/annual",
     },
     {
       id: "monthly",
@@ -49,9 +56,9 @@ export default function ReportsPage() {
         "Daily spending patterns",
         "Weekly breakdowns",
         "Top transactions",
-        "Budget vs actual"
+        "Budget vs actual",
       ],
-      href: "/reports/monthly"
+      href: "/reports/monthly",
     },
     {
       id: "categories",
@@ -64,9 +71,9 @@ export default function ReportsPage() {
         "Category spending trends",
         "Top spending categories",
         "Monthly category breakdown",
-        "Spending insights"
+        "Spending insights",
       ],
-      href: "/reports/categories"
+      href: "/reports/categories",
     },
     {
       id: "goals",
@@ -79,20 +86,23 @@ export default function ReportsPage() {
         "Goal progress tracking",
         "Completion rates",
         "Contribution analysis",
-        "Overdue goals alert"
+        "Overdue goals alert",
       ],
-      href: "/reports/goals"
-    }
-  ];
+      href: "/reports/goals",
+    },
+  ]
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Reports & Analytics</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Reports & Analytics
+          </h1>
           <p className="text-muted-foreground">
-            Comprehensive financial insights and detailed analysis of your spending patterns
+            Comprehensive financial insights and detailed analysis of your
+            spending patterns
           </p>
         </div>
         <Badge variant="secondary" className="text-sm">
@@ -103,7 +113,7 @@ export default function ReportsPage() {
 
       {/* Report Types */}
       <div className="grid gap-6 md:grid-cols-2">
-        {reportTypes.map((report) => (
+        {reportTypes.map(report => (
           <Card key={report.id} className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <div className="flex items-center space-x-4">
@@ -121,7 +131,10 @@ export default function ReportsPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 {report.features.map((feature, index) => (
-                  <div key={index} className="flex items-center text-sm text-muted-foreground">
+                  <div
+                    key={index}
+                    className="flex items-center text-sm text-muted-foreground"
+                  >
                     <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground mr-2" />
                     {feature}
                   </div>
@@ -138,5 +151,5 @@ export default function ReportsPage() {
         ))}
       </div>
     </div>
-  );
-} 
+  )
+}

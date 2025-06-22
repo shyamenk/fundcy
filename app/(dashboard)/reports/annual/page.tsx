@@ -1,10 +1,22 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BarChart3,
@@ -16,7 +28,7 @@ import {
   Target,
   PieChart,
   LineChart,
-  ArrowLeft
+  ArrowLeft,
 } from "lucide-react";
 import Link from "next/link";
 import { formatINR } from "@/lib/utils";
@@ -70,8 +82,16 @@ interface AnnualReportData {
 }
 
 const COLORS = [
-  "#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6",
-  "#06b6d4", "#84cc16", "#f97316", "#ec4899", "#6366f1"
+  "#3b82f6",
+  "#ef4444",
+  "#10b981",
+  "#f59e0b",
+  "#8b5cf6",
+  "#06b6d4",
+  "#84cc16",
+  "#f97316",
+  "#ec4899",
+  "#6366f1",
 ];
 
 export default function AnnualReportPage() {
@@ -157,30 +177,38 @@ export default function AnnualReportPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+      <div className="flex items-center justify-between mb-8">
+        <div className="space-y-4">
           <Link href="/reports">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="mb-10">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Reports
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Annual Report {data.year}</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Annual Report {data.year}
+            </h1>
             <p className="text-muted-foreground">
               Comprehensive financial analysis for {data.year}
             </p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <Select value={year.toString()} onValueChange={(value) => setYear(parseInt(value))}>
+          <Select
+            value={year.toString()}
+            onValueChange={value => setYear(parseInt(value))}
+          >
             <SelectTrigger className="w-[140px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map((y) => (
+              {Array.from(
+                { length: 5 },
+                (_, i) => new Date().getFullYear() - i
+              ).map(y => (
                 <SelectItem key={y} value={y.toString()}>
                   {y}
                 </SelectItem>
@@ -202,7 +230,9 @@ export default function AnnualReportPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatINR(data.totals.income)}</div>
+            <div className="text-2xl font-bold">
+              {formatINR(data.totals.income)}
+            </div>
             <p className="text-xs text-muted-foreground">
               Avg: {formatINR(data.metrics.averageMonthlyIncome)}/month
             </p>
@@ -211,11 +241,15 @@ export default function AnnualReportPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Expenses
+            </CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatINR(data.totals.expenses)}</div>
+            <div className="text-2xl font-bold">
+              {formatINR(data.totals.expenses)}
+            </div>
             <p className="text-xs text-muted-foreground">
               Avg: {formatINR(data.metrics.averageMonthlyExpenses)}/month
             </p>
@@ -224,15 +258,23 @@ export default function AnnualReportPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Worth Change</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Net Worth Change
+            </CardTitle>
             {data.netWorthChange >= 0 ? (
-              <TrendingUp className={`h-4 w-4 ${getGrowthColor(data.netWorthChange)}`} />
+              <TrendingUp
+                className={`h-4 w-4 ${getGrowthColor(data.netWorthChange)}`}
+              />
             ) : (
-              <TrendingDown className={`h-4 w-4 ${getGrowthColor(data.netWorthChange)}`} />
+              <TrendingDown
+                className={`h-4 w-4 ${getGrowthColor(data.netWorthChange)}`}
+              />
             )}
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${getGrowthColor(data.netWorthChange)}`}>
+            <div
+              className={`text-2xl font-bold ${getGrowthColor(data.netWorthChange)}`}
+            >
               {formatINR(data.netWorthChange)}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -243,11 +285,15 @@ export default function AnnualReportPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Transactions
+            </CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.metrics.totalTransactions}</div>
+            <div className="text-2xl font-bold">
+              {data.metrics.totalTransactions}
+            </div>
             <p className="text-xs text-muted-foreground">
               Expense Ratio: {data.metrics.expenseRatio.toFixed(1)}%
             </p>
@@ -277,18 +323,42 @@ export default function AnnualReportPage() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
                     dataKey="month"
-                    tickFormatter={(value) => format(new Date(value + "-01"), "MMM")}
+                    tickFormatter={value =>
+                      format(new Date(value + "-01"), "MMM")
+                    }
                   />
-                  <YAxis tickFormatter={(value) => formatINR(value)} />
+                  <YAxis tickFormatter={value => formatINR(value)} />
                   <Tooltip
                     formatter={(value: number) => [formatINR(value), "Amount"]}
-                    labelFormatter={(label) => format(new Date(label + "-01"), "MMMM yyyy")}
+                    labelFormatter={label =>
+                      format(new Date(label + "-01"), "MMMM yyyy")
+                    }
                   />
                   <Legend />
-                  <Line type="monotone" dataKey="income" stroke="#10b981" strokeWidth={2} />
-                  <Line type="monotone" dataKey="expenses" stroke="#ef4444" strokeWidth={2} />
-                  <Line type="monotone" dataKey="savings" stroke="#3b82f6" strokeWidth={2} />
-                  <Line type="monotone" dataKey="investments" stroke="#8b5cf6" strokeWidth={2} />
+                  <Line
+                    type="monotone"
+                    dataKey="income"
+                    stroke="#10b981"
+                    strokeWidth={2}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="expenses"
+                    stroke="#ef4444"
+                    strokeWidth={2}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="savings"
+                    stroke="#3b82f6"
+                    strokeWidth={2}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="investments"
+                    stroke="#8b5cf6"
+                    strokeWidth={2}
+                  />
                 </RechartsLineChart>
               </ResponsiveContainer>
             </CardContent>
@@ -312,32 +382,51 @@ export default function AnnualReportPage() {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ category, percentage }) => `${category} ${percentage.toFixed(1)}%`}
+                      label={({ category, percentage }) =>
+                        `${category} ${percentage.toFixed(1)}%`
+                      }
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="amount"
                     >
                       {data.categoryBreakdown.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: number) => [formatINR(value), "Amount"]} />
+                    <Tooltip
+                      formatter={(value: number) => [
+                        formatINR(value),
+                        "Amount",
+                      ]}
+                    />
                   </RechartsPieChart>
                 </ResponsiveContainer>
                 <div className="space-y-4">
                   <h4 className="font-medium">Category Details</h4>
                   <div className="space-y-2">
                     {data.categoryBreakdown.map((category, index) => (
-                      <div key={category.category} className="flex items-center justify-between p-2 border rounded">
+                      <div
+                        key={category.category}
+                        className="flex items-center justify-between p-2 border rounded"
+                      >
                         <div className="flex items-center space-x-2">
                           <div
                             className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                            style={{
+                              backgroundColor: COLORS[index % COLORS.length],
+                            }}
                           />
-                          <span className="font-medium">{category.category}</span>
+                          <span className="font-medium">
+                            {category.category}
+                          </span>
                         </div>
                         <div className="text-right">
-                          <div className="font-semibold">{formatINR(category.amount)}</div>
+                          <div className="font-semibold">
+                            {formatINR(category.amount)}
+                          </div>
                           <div className="text-sm text-muted-foreground">
                             {category.percentage.toFixed(1)}%
                           </div>
@@ -365,16 +454,24 @@ export default function AnnualReportPage() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
                     dataKey="month"
-                    tickFormatter={(value) => format(new Date(value + "-01"), "MMM")}
+                    tickFormatter={value =>
+                      format(new Date(value + "-01"), "MMM")
+                    }
                   />
-                  <YAxis tickFormatter={(value) => formatINR(value)} />
+                  <YAxis tickFormatter={value => formatINR(value)} />
                   <Tooltip
                     formatter={(value: number) => [formatINR(value), "Amount"]}
-                    labelFormatter={(label) => format(new Date(label + "-01"), "MMMM yyyy")}
+                    labelFormatter={label =>
+                      format(new Date(label + "-01"), "MMMM yyyy")
+                    }
                   />
                   <Legend />
                   <Bar dataKey="income" fill="#10b981" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="expenses" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                  <Bar
+                    dataKey="expenses"
+                    fill="#ef4444"
+                    radius={[4, 4, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -383,4 +480,4 @@ export default function AnnualReportPage() {
       </Tabs>
     </div>
   );
-} 
+}

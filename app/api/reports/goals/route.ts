@@ -258,39 +258,50 @@ export async function GET(request: NextRequest) {
           new Date(a.targetDate!).getTime() - new Date(b.targetDate!).getTime()
       )
 
+    // Calculate insights
+    const completionRate =
+      goalStats.total > 0 ? (goalStats.completed / goalStats.total) * 100 : 0
+    const averageGoalValue =
+      goalStats.total > 0 ? goalStats.totalTargetAmount / goalStats.total : 0
+    const averageMonthlyContribution =
+      monthlyBreakdown.length > 0
+        ? goalStats.totalContributions / monthlyBreakdown.length
+        : 0
+    // Find most active category
+    const mostActiveCategory =
+      categoryData.length > 0
+        ? categoryData.reduce((a, b) => (a.count > b.count ? a : b)).category
+        : "-"
+    // Find fastest progressing goal
+    const fastestProgressingGoal =
+      goalProgress.length > 0
+        ? goalProgress.reduce((a, b) => (a.progress > b.progress ? a : b)).title
+        : "-"
+    // Find most overdue goal
+    const mostOverdueGoal =
+      overdueGoals.length > 0 ? overdueGoals[0].title : "-"
+    // Add averageProgress to each category
+    const categoryBreakdownWithAvg = categoryData.map(cat => ({
+      ...cat,
+      averageProgress:
+        cat.count > 0 ? (cat.totalCurrent / cat.totalTarget) * 100 : 0,
+    }))
+
     return NextResponse.json({
       success: true,
       data: {
-        year: parseInt(year),
-        summary: {
-          ...goalStats,
-          overallProgress,
-          averageProgress:
-            goalProgress.length > 0
-              ? goalProgress.reduce((sum, g) => sum + g.progress, 0) /
-                goalProgress.length
-              : 0,
-        },
+        goalStats,
+        overallProgress,
         goalProgress,
-        monthlyBreakdown,
-        categoryBreakdown: categoryData,
-        topGoals,
-        recentlyCompleted,
-        overdueGoals,
-        metrics: {
-          completionRate:
-            goalStats.total > 0
-              ? (goalStats.completed / goalStats.total) * 100
-              : 0,
-          averageGoalValue:
-            goalStats.total > 0
-              ? goalStats.totalTargetAmount / goalStats.total
-              : 0,
-          averageContribution:
-            yearContributions.length > 0
-              ? goalStats.totalContributions / yearContributions.length
-              : 0,
-          totalContributions: yearContributions.length,
+        monthlyContributions: monthlyBreakdown,
+        categoryBreakdown: categoryBreakdownWithAvg,
+        insights: {
+          mostActiveCategory,
+          fastestProgressingGoal,
+          mostOverdueGoal,
+          averageGoalValue,
+          completionRate,
+          averageMonthlyContribution,
         },
       },
     })

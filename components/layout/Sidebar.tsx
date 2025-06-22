@@ -1,8 +1,8 @@
-import React from "react";
-import Link from "next/link";
-import { Home, Landmark, BarChart2, Settings, Goal } from "lucide-react";
+import React from "react"
+import Link from "next/link"
+import { Home, Landmark, BarChart2, Settings, Goal } from "lucide-react"
 
-export const MainNav = ({ className }: { className?: string; }) => {
+export const MainNav = ({ className }: { className?: string }) => {
   return (
     <nav className={className}>
       <Link
@@ -41,8 +41,8 @@ export const MainNav = ({ className }: { className?: string; }) => {
         Settings
       </Link>
     </nav>
-  );
-};
+  )
+}
 
 const Sidebar = () => {
   return (
@@ -59,7 +59,7 @@ const Sidebar = () => {
         </div>
       </div>
     </aside>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar
