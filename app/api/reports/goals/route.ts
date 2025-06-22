@@ -50,7 +50,10 @@ export async function GET(request: NextRequest) {
         transactionDate: transactions.date,
       })
       .from(goalContributions)
-      .leftJoin(transactions, eq(goalContributions.transactionId, transactions.id))
+      .leftJoin(
+        transactions,
+        eq(goalContributions.transactionId, transactions.id)
+      )
       .where(
         and(
           gte(goalContributions.createdAt, startDate),
@@ -80,17 +83,22 @@ export async function GET(request: NextRequest) {
     })
 
     // Calculate overall progress
-    const overallProgress = goalStats.totalTargetAmount > 0 
-      ? (goalStats.totalCurrentAmount / goalStats.totalTargetAmount) * 100 
-      : 0
+    const overallProgress =
+      goalStats.totalTargetAmount > 0
+        ? (goalStats.totalCurrentAmount / goalStats.totalTargetAmount) * 100
+        : 0
 
     // Goal progress breakdown
     const goalProgress = allGoals.map(goal => {
       const targetAmount = Number(goal.targetAmount)
       const currentAmount = Number(goal.currentAmount)
-      const progress = targetAmount > 0 ? (currentAmount / targetAmount) * 100 : 0
+      const progress =
+        targetAmount > 0 ? (currentAmount / targetAmount) * 100 : 0
       const remaining = targetAmount - currentAmount
-      const isOverdue = goal.targetDate && new Date(goal.targetDate) < new Date() && goal.status === "active"
+      const isOverdue =
+        goal.targetDate &&
+        new Date(goal.targetDate) < new Date() &&
+        goal.status === "active"
 
       return {
         id: goal.id,
@@ -109,11 +117,14 @@ export async function GET(request: NextRequest) {
     })
 
     // Monthly contribution breakdown
-    const monthlyContributions = new Map<string, {
-      total: number
-      count: number
-      goals: Map<string, number>
-    }>()
+    const monthlyContributions = new Map<
+      string,
+      {
+        total: number
+        count: number
+        goals: Map<string, number>
+      }
+    >()
 
     // Initialize all months
     for (let month = 0; month < 12; month++) {
@@ -127,37 +138,46 @@ export async function GET(request: NextRequest) {
 
     // Aggregate contributions by month
     yearContributions.forEach(contribution => {
+      if (!contribution.createdAt) return // Skip if createdAt is null
+
       const monthKey = format(new Date(contribution.createdAt), "yyyy-MM")
       const current = monthlyContributions.get(monthKey)
       if (current) {
         const amount = Number(contribution.amount)
         current.total += amount
         current.count += 1
-        
+
         // Add to goal breakdown
-        const goalTitle = allGoals.find(g => g.id === contribution.goalId)?.title || "Unknown Goal"
+        const goalTitle =
+          allGoals.find(g => g.id === contribution.goalId)?.title ||
+          "Unknown Goal"
         const goalAmount = current.goals.get(goalTitle) || 0
         current.goals.set(goalTitle, goalAmount + amount)
       }
     })
 
-    const monthlyBreakdown = Array.from(monthlyContributions.entries()).map(([month, data]) => ({
-      month,
-      total: data.total,
-      count: data.count,
-      goals: Array.from(data.goals.entries()).map(([title, amount]) => ({
-        title,
-        amount,
-      })),
-    }))
+    const monthlyBreakdown = Array.from(monthlyContributions.entries()).map(
+      ([month, data]) => ({
+        month,
+        total: data.total,
+        count: data.count,
+        goals: Array.from(data.goals.entries()).map(([title, amount]) => ({
+          title,
+          amount,
+        })),
+      })
+    )
 
     // Category breakdown
-    const categoryBreakdown = new Map<string, {
-      count: number
-      totalTarget: number
-      totalCurrent: number
-      totalContributions: number
-    }>()
+    const categoryBreakdown = new Map<
+      string,
+      {
+        count: number
+        totalTarget: number
+        totalCurrent: number
+        totalContributions: number
+      }
+    >()
 
     allGoals.forEach(goal => {
       const category = goal.category || "Uncategorized"
@@ -186,14 +206,19 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    const categoryData = Array.from(categoryBreakdown.entries()).map(([category, data]) => ({
-      category,
-      count: data.count,
-      totalTarget: data.totalTarget,
-      totalCurrent: data.totalCurrent,
-      totalContributions: data.totalContributions,
-      progress: data.totalTarget > 0 ? (data.totalCurrent / data.totalTarget) * 100 : 0,
-    }))
+    const categoryData = Array.from(categoryBreakdown.entries()).map(
+      ([category, data]) => ({
+        category,
+        count: data.count,
+        totalTarget: data.totalTarget,
+        totalCurrent: data.totalCurrent,
+        totalContributions: data.totalContributions,
+        progress:
+          data.totalTarget > 0
+            ? (data.totalCurrent / data.totalTarget) * 100
+            : 0,
+      })
+    )
 
     // Top performing goals
     const topGoals = goalProgress
@@ -215,15 +240,23 @@ export async function GET(request: NextRequest) {
         category: goal.category,
         targetAmount: Number(goal.targetAmount),
         completedAt: goal.completedAt,
-        daysToComplete: goal.createdAt && goal.completedAt 
-          ? Math.ceil((new Date(goal.completedAt).getTime() - new Date(goal.createdAt).getTime()) / (1000 * 60 * 60 * 24))
-          : 0,
+        daysToComplete:
+          goal.createdAt && goal.completedAt
+            ? Math.ceil(
+                (new Date(goal.completedAt).getTime() -
+                  new Date(goal.createdAt).getTime()) /
+                  (1000 * 60 * 60 * 24)
+              )
+            : 0,
       }))
 
     // Overdue goals
     const overdueGoals = goalProgress
       .filter(g => g.isOverdue)
-      .sort((a, b) => new Date(a.targetDate!).getTime() - new Date(b.targetDate!).getTime())
+      .sort(
+        (a, b) =>
+          new Date(a.targetDate!).getTime() - new Date(b.targetDate!).getTime()
+      )
 
     return NextResponse.json({
       success: true,
@@ -232,9 +265,11 @@ export async function GET(request: NextRequest) {
         summary: {
           ...goalStats,
           overallProgress,
-          averageProgress: goalProgress.length > 0 
-            ? goalProgress.reduce((sum, g) => sum + g.progress, 0) / goalProgress.length 
-            : 0,
+          averageProgress:
+            goalProgress.length > 0
+              ? goalProgress.reduce((sum, g) => sum + g.progress, 0) /
+                goalProgress.length
+              : 0,
         },
         goalProgress,
         monthlyBreakdown,
@@ -243,9 +278,18 @@ export async function GET(request: NextRequest) {
         recentlyCompleted,
         overdueGoals,
         metrics: {
-          completionRate: goalStats.total > 0 ? (goalStats.completed / goalStats.total) * 100 : 0,
-          averageGoalValue: goalStats.total > 0 ? goalStats.totalTargetAmount / goalStats.total : 0,
-          averageContribution: yearContributions.length > 0 ? goalStats.totalContributions / yearContributions.length : 0,
+          completionRate:
+            goalStats.total > 0
+              ? (goalStats.completed / goalStats.total) * 100
+              : 0,
+          averageGoalValue:
+            goalStats.total > 0
+              ? goalStats.totalTargetAmount / goalStats.total
+              : 0,
+          averageContribution:
+            yearContributions.length > 0
+              ? goalStats.totalContributions / yearContributions.length
+              : 0,
           totalContributions: yearContributions.length,
         },
       },
@@ -257,4 +301,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     )
   }
-} 
+}
