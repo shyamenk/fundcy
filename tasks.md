@@ -65,19 +65,19 @@
 
 #### Subtasks:
 
-- [ ] Create folder structure as per PRD specifications
-- [ ] Create base layout components (Sidebar, Header, Main content area) based on design
-- [ ] Implement responsive navigation structure in Sidebar
-- [ ] Implement dark mode / theme switching functionality
-- [ ] Create shared UI components (e.g., PageHeader, StatCard)
-- [ ] Setup global CSS and design tokens for light/dark modes
+- [x] Create folder structure as per PRD specifications
+- [x] Create base layout components (Sidebar, Header, Main content area) based on design
+- [x] Implement responsive navigation structure in Sidebar
+- [x] Implement dark mode / theme switching functionality
+- [x] Create shared UI components (e.g., PageHeader, StatCard)
+- [x] Setup global CSS and design tokens for light/dark modes
 
 #### Acceptance Criteria:
 
-- [ ] Clean, organized project structure
-- [ ] Base layout matches the provided design reference
-- [ ] Dark mode is functional and toggles correctly
-- [ ] Navigation structure is responsive
+- [x] Clean, organized project structure
+- [x] Base layout matches the provided design reference
+- [x] Dark mode is functional and toggles correctly
+- [x] Navigation structure is responsive
 
 ---
 
@@ -91,23 +91,25 @@
 
 #### Subtasks:
 
-- [ ] Create Zod validation schemas for transactions
-- [ ] Implement transaction TypeScript types
-- [ ] Build transaction API endpoints:
-  - [ ] GET /api/transactions (with pagination)
-  - [ ] POST /api/transactions
-  - [ ] GET /api/transactions/[id]
-  - [ ] PUT /api/transactions/[id]
-  - [ ] DELETE /api/transactions/[id]
-  - [ ] GET /api/transactions/recent
-- [ ] Implement database queries with Drizzle ORM
-- [ ] Add proper error handling and validation
+- [x] Create Zod validation schemas for transactions
+- [x] Implement transaction TypeScript types
+- [x] Build transaction API endpoints:
+  - [x] GET /api/transactions (with pagination)
+  - [x] POST /api/transactions
+  - [x] GET /api/transactions/[id]
+  - [x] PUT /api/transactions/[id]
+  - [x] DELETE /api/transactions/[id]
+  - [x] GET /api/transactions/recent
+- [x] Implement database queries with Drizzle ORM
+- [x] Add proper error handling and validation
+- [x] Create React Server Actions for form handling
 
 #### Acceptance Criteria:
 
-- [ ] All CRUD operations working
-- [ ] Proper validation and error handling
-- [ ] API endpoints returning consistent format
+- [x] All CRUD operations working
+- [x] Proper validation and error handling
+- [x] API endpoints returning consistent format
+- [x] Server actions implemented for seamless form handling
 
 ---
 
@@ -117,22 +119,22 @@
 
 #### Subtasks:
 
-- [ ] Create transaction form component with React Hook Form
-- [ ] Implement form validation with Zod resolver
-- [ ] Build transaction type selector (Income/Expense/Savings/Investment)
-- [ ] Create category dropdown with dynamic options
-- [ ] Add date picker component
-- [ ] Implement amount input with proper formatting
-- [ ] Create transaction list component with sorting
-- [ ] Add edit/delete functionality to transaction items
-- [ ] Implement search and filter capabilities
+- [x] Create transaction form component with React Hook Form
+- [x] Implement form validation with Zod resolver
+- [x] Build transaction type selector (Income/Expense/Savings/Investment)
+- [x] Create category dropdown with dynamic options
+- [x] Add date picker component
+- [x] Implement amount input with proper formatting
+- [x] Create transaction list component with sorting
+- [x] Add edit/delete functionality to transaction items
+- [x] Implement search and filter capabilities
 
 #### Acceptance Criteria:
 
-- [ ] Form validation working properly
-- [ ] All transaction types supported
-- [ ] Search and filter functional
-- [ ] Edit/delete operations working
+- [x] Form validation working properly
+- [x] All transaction types supported
+- [x] Search and filter functional
+- [x] Edit/delete operations working
 
 ---
 
@@ -142,18 +144,17 @@
 
 #### Subtasks:
 
-- [ ] Create transactions list page (/transactions)
-- [ ] Implement add transaction page (/transactions/add)
-- [ ] Build edit transaction page (/transactions/[id])
-- [ ] Add pagination for transaction list
+- [x] Create transactions list page (/transactions)
+- [x] Implement add transaction page (/transactions/add)
+- [x] Build edit transaction page (/transactions/[id])
+- [x] Add pagination for transaction list
 - [ ] Implement bulk operations (delete multiple)
-- [ ] Create transaction filters sidebar
 - [ ] Add export functionality (CSV/PDF)
 
 #### Acceptance Criteria:
 
-- [ ] All transaction pages functional
-- [ ] Pagination working properly
+- [x] All transaction pages functional
+- [x] Pagination working properly
 - [ ] Bulk operations implemented
 - [ ] Export features working
 
@@ -169,21 +170,21 @@
 
 #### Subtasks:
 
-- [ ] Create dashboard API endpoints:
-  - [ ] GET /api/dashboard (overview data)
-  - [ ] GET /api/dashboard/net-worth
-- [ ] Implement financial calculation utilities:
-  - [ ] Net worth calculation (Assets - Liabilities)
-  - [ ] Category totals calculation
-  - [ ] Monthly/Annual summaries
-- [ ] Create custom React hooks for dashboard data
-- [ ] Implement real-time data updates
+- [x] Create dashboard API endpoints:
+  - [x] GET /api/dashboard (overview data)
+  - [x] GET /api/dashboard/net-worth
+- [x] Implement financial calculation utilities:
+  - [x] Net worth calculation (Assets - Liabilities)
+  - [x] Category totals calculation
+  - [x] Monthly/Annual summaries
+- [x] Create custom React hooks for dashboard data
+- [x] Implement real-time data updates
 
 #### Acceptance Criteria:
 
-- [ ] Dashboard API returning accurate calculations
-- [ ] Financial calculations properly implemented
-- [ ] Real-time updates working
+- [x] Dashboard API returning accurate calculations
+- [x] Financial calculations properly implemented
+- [x] Real-time updates working
 
 ---
 
@@ -193,21 +194,21 @@
 
 #### Subtasks:
 
-- [ ] Create "My Balance" card component
-- [ ] Create "My Income" card component
-- [ ] Create "Total Expense" card component
+- [x] Create "My Balance" card component
+- [x] Create "My Income" card component
+- [x] Create "Total Expense" card component
 - [ ] Create "Money Flow" chart component
-- [ ] Create "Remaining Monthly" and "Budget" components
-- [ ] Create "Transaction History" table component for dashboard preview
-- [ ] Assemble dashboard page with a responsive grid layout based on the design
-- [ ] Ensure all components are styled for both light and dark modes
+- [x] Create "Remaining Monthly" and "Budget" components
+- [x] Create "Transaction History" table component for dashboard preview
+- [x] Assemble dashboard page with a responsive grid layout based on the design
+- [x] Ensure all components are styled for both light and dark modes
 
 #### Acceptance Criteria:
 
-- [ ] Dashboard layout and components closely match the provided design reference
-- [ ] All overview data displaying correctly
-- [ ] Components are responsive and work well on different screen sizes
-- [ ] Dark mode is fully supported for all dashboard components
+- [x] Dashboard layout and components closely match the provided design reference
+- [x] All overview data displaying correctly
+- [x] Components are responsive and work well on different screen sizes
+- [x] Dark mode is fully supported for all dashboard components
 
 ---
 

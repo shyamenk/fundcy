@@ -9,6 +9,7 @@ import {
   boolean,
   pgEnum,
 } from "drizzle-orm/pg-core"
+import { relations } from "drizzle-orm"
 
 export const transactionTypeEnum = pgEnum("transaction_type", [
   "income",
@@ -69,6 +70,36 @@ export const goalContributions = pgTable("goal_contributions", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 })
 
+// Define relationships
+export const categoriesRelations = relations(categories, ({ many }) => ({
+  transactions: many(transactions),
+}))
+
+export const transactionsRelations = relations(transactions, ({ one }) => ({
+  category: one(categories, {
+    fields: [transactions.categoryId],
+    references: [categories.id],
+  }),
+}))
+
+export const goalsRelations = relations(goals, ({ many }) => ({
+  contributions: many(goalContributions),
+}))
+
+export const goalContributionsRelations = relations(
+  goalContributions,
+  ({ one }) => ({
+    goal: one(goals, {
+      fields: [goalContributions.goalId],
+      references: [goals.id],
+    }),
+    transaction: one(transactions, {
+      fields: [goalContributions.transactionId],
+      references: [transactions.id],
+    }),
+  })
+)
+
 // Export all schema elements for Drizzle
 export const schema = {
   categories,
@@ -77,4 +108,8 @@ export const schema = {
   goalContributions,
   transactionTypeEnum,
   goalStatusEnum,
+  categoriesRelations,
+  transactionsRelations,
+  goalsRelations,
+  goalContributionsRelations,
 }
