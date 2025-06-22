@@ -1,6 +1,14 @@
 import React from "react"
 import Link from "next/link"
-import { Home, Landmark, BarChart2, Settings, Goal } from "lucide-react"
+import {
+  Home,
+  Landmark,
+  BarChart2,
+  Settings,
+  Goal,
+  TrendingUp,
+  CreditCard,
+} from "lucide-react"
 
 export const MainNav = ({ className }: { className?: string }) => {
   return (
@@ -25,6 +33,20 @@ export const MainNav = ({ className }: { className?: string }) => {
       >
         <Goal className="h-4 w-4" />
         Goals
+      </Link>
+      <Link
+        href="/portfolio"
+        className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+      >
+        <TrendingUp className="h-4 w-4" />
+        Investment Portfolio
+      </Link>
+      <Link
+        href="/debit-expenses"
+        className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+      >
+        <CreditCard className="h-4 w-4" />
+        Debit Card Expenses
       </Link>
       <Link
         href="/reports"

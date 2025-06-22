@@ -8,6 +8,7 @@ const envSchema = z.object({
   NEXT_PUBLIC_APP_NAME: z.string().default("Personal Finance Tracker"),
   DATABASE_URL: z.string().url().optional(),
   NEXT_PUBLIC_ANALYTICS_ID: z.string().optional(),
+  NEXTAUTH_SECRET: z.string().optional(),
 })
 
 const env = envSchema.parse(process.env)

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { transactions, categories } from "@/lib/db/schema"
 import { eq, and, gte, lte, desc, sql } from "drizzle-orm"
@@ -12,6 +14,15 @@ import {
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Authentication required" },
+        { status: 401 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const year = searchParams.get("year") || new Date().getFullYear().toString()
     const month =
@@ -39,6 +50,7 @@ export async function GET(request: NextRequest) {
       .leftJoin(categories, eq(transactions.categoryId, categories.id))
       .where(
         and(
+          eq(transactions.userId, session.user.id),
           gte(transactions.date, format(startDate, "yyyy-MM-dd")),
           lte(transactions.date, format(endDate, "yyyy-MM-dd"))
         )

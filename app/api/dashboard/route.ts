@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { transactions } from "@/lib/db/schema"
 import { eq, and, gte, lte, desc } from "drizzle-orm"
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Authentication required" },
+        { status: 401 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const period = searchParams.get("period") || "month" // month, quarter, year, custom
     const customDate = searchParams.get("customDate") // YYYY-MM format
@@ -47,6 +58,7 @@ export async function GET(request: NextRequest) {
       .from(transactions)
       .where(
         and(
+          eq(transactions.userId, session.user.id),
           gte(transactions.date, startDate.toISOString().split("T")[0]),
           lte(transactions.date, endDate.toISOString().split("T")[0])
         )
@@ -74,6 +86,7 @@ export async function GET(request: NextRequest) {
     const allTransactions = await db
       .select()
       .from(transactions)
+      .where(eq(transactions.userId, session.user.id))
       .orderBy(desc(transactions.date))
 
     const totalIncome = allTransactions
@@ -99,6 +112,7 @@ export async function GET(request: NextRequest) {
     const recentTransactions = await db
       .select()
       .from(transactions)
+      .where(eq(transactions.userId, session.user.id))
       .orderBy(desc(transactions.date))
       .limit(5)
 

@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
-import { eq } from "drizzle-orm"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { eq, and } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { transactions } from "@/lib/db/schema"
 import { updateTransactionSchema } from "@/lib/validations/transaction"
+import {
+  getTransactionById,
+  updateTransaction,
+  deleteTransaction,
+} from "@/lib/db/transactions"
 
 // GET /api/transactions/[id] - Get a specific transaction
 export async function GET(
@@ -10,14 +17,18 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Authentication required" },
+        { status: 401 }
+      )
+    }
+
     const { id } = await params
 
-    const transaction = await db.query.transactions.findFirst({
-      where: eq(transactions.id, id),
-      with: {
-        category: true,
-      },
-    })
+    const transaction = await getTransactionById(id, session.user.id)
 
     if (!transaction) {
       return NextResponse.json(
@@ -42,6 +53,15 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Authentication required" },
+        { status: 401 }
+      )
+    }
+
     const { id } = await params
     const body = await request.json()
 
@@ -58,20 +78,16 @@ export async function PUT(
       )
     }
 
-    const { type, amount, description, categoryId, date } = parsed.data
+    const result = await updateTransaction(id, parsed.data, session.user.id)
 
-    const updateData = {
-      ...(type && { type }),
-      ...(amount !== undefined && { amount: amount.toString() }),
-      ...(description && { description }),
-      ...(categoryId && { categoryId }),
-      ...(date && { date }),
-      updatedAt: new Date(),
+    if (!result || result.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "Transaction not found" },
+        { status: 404 }
+      )
     }
 
-    await db.update(transactions).set(updateData).where(eq(transactions.id, id))
-
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, data: result[0] })
   } catch (error) {
     console.error("Error updating transaction:", error)
     return NextResponse.json(
@@ -87,20 +103,25 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Authentication required" },
+        { status: 401 }
+      )
+    }
+
     const { id } = await params
 
-    const transaction = await db.query.transactions.findFirst({
-      where: eq(transactions.id, id),
-    })
+    const result = await deleteTransaction(id, session.user.id)
 
-    if (!transaction) {
+    if (!result || result.length === 0) {
       return NextResponse.json(
         { success: false, error: "Transaction not found" },
         { status: 404 }
       )
     }
-
-    await db.delete(transactions).where(eq(transactions.id, id))
 
     return NextResponse.json({
       success: true,

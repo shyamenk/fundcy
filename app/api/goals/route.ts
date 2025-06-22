@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { goals } from "@/lib/db/schema"
 import { goalSchema } from "@/lib/validations/goal"
@@ -6,11 +8,20 @@ import { desc, eq, and } from "drizzle-orm"
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Authentication required" },
+        { status: 401 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const status = searchParams.get("status")
     const category = searchParams.get("category")
 
-    let whereConditions = []
+    let whereConditions = [eq(goals.userId, session.user.id)]
 
     if (status) {
       whereConditions.push(eq(goals.status, status as any))
@@ -23,7 +34,7 @@ export async function GET(request: NextRequest) {
     const allGoals = await db
       .select()
       .from(goals)
-      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+      .where(and(...whereConditions))
       .orderBy(desc(goals.createdAt))
 
     return NextResponse.json({
@@ -41,6 +52,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Authentication required" },
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
     const validatedData = goalSchema.parse(body)
 
@@ -54,6 +74,7 @@ export async function POST(request: NextRequest) {
         targetDate: validatedData.targetDate || null,
         category: validatedData.category || null,
         status: validatedData.status || "active",
+        userId: session.user.id,
       })
       .returning()
 

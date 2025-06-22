@@ -1,14 +1,40 @@
+"use client"
+
 import React from "react"
 import Link from "next/link"
-import { Search, Bell, Menu, Landmark } from "lucide-react"
+import { Search, Bell, Menu, Landmark, User, LogOut } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { ThemeToggle } from "./ThemeToggle"
 import { MainNav } from "./Sidebar"
+import { useSession, signOut } from "next-auth/react"
 
 const Header = () => {
+  const { data: session, status } = useSession()
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/auth/signin" })
+  }
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map(n => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2)
+  }
+
   return (
     <header className="flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
       <div className="flex items-center gap-4">
@@ -36,9 +62,6 @@ const Header = () => {
             </nav>
           </SheetContent>
         </Sheet>
-        <h1 className="hidden text-lg font-semibold md:block md:text-2xl">
-          Dashboard
-        </h1>
       </div>
       <div className="flex flex-1 items-center justify-end gap-4">
         <div className="relative ml-auto flex-1 md:grow-0">
@@ -54,10 +77,62 @@ const Header = () => {
           <Bell className="h-5 w-5" />
           <span className="sr-only">Toggle notifications</span>
         </Button>
-        <Avatar>
-          <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-          <AvatarFallback>CN</AvatarFallback>
-        </Avatar>
+
+        {status === "loading" ? (
+          <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
+        ) : session ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage
+                    src={session.user?.image || ""}
+                    alt={session.user?.name || ""}
+                  />
+                  <AvatarFallback>
+                    {session.user?.name ? getInitials(session.user.name) : "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">
+                    {session.user?.name || "User"}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {session.user?.email}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/profile" className="flex items-center">
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleSignOut}
+                className="text-red-600"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" asChild>
+              <Link href="/auth/signin">Sign in</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/auth/signup">Sign up</Link>
+            </Button>
+          </div>
+        )}
       </div>
     </header>
   )

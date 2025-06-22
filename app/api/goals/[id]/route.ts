@@ -1,18 +1,29 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { goals } from "@/lib/db/schema"
 import { goalUpdateSchema, goalCompleteSchema } from "@/lib/validations/goal"
-import { eq } from "drizzle-orm"
+import { eq, and } from "drizzle-orm"
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Authentication required" },
+        { status: 401 }
+      )
+    }
+
     const goal = await db
       .select()
       .from(goals)
-      .where(eq(goals.id, params.id))
+      .where(and(eq(goals.id, params.id), eq(goals.userId, session.user.id)))
       .limit(1)
 
     if (goal.length === 0) {
@@ -40,6 +51,15 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Authentication required" },
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
     const validatedData = goalUpdateSchema.parse({ ...body, id: params.id })
 
@@ -55,7 +75,7 @@ export async function PUT(
         status: validatedData.status,
         updatedAt: new Date(),
       })
-      .where(eq(goals.id, params.id))
+      .where(and(eq(goals.id, params.id), eq(goals.userId, session.user.id)))
       .returning()
 
     if (updatedGoal.length === 0) {
@@ -89,9 +109,18 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Authentication required" },
+        { status: 401 }
+      )
+    }
+
     const deletedGoal = await db
       .delete(goals)
-      .where(eq(goals.id, params.id))
+      .where(and(eq(goals.id, params.id), eq(goals.userId, session.user.id)))
       .returning()
 
     if (deletedGoal.length === 0) {
