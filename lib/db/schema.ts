@@ -182,6 +182,9 @@ export const investmentHoldings = pgTable("investment_holdings", {
   units: decimal("units", { precision: 10, scale: 4 }),
   avgPurchasePrice: decimal("avg_purchase_price", { precision: 12, scale: 2 }),
   currentPrice: decimal("current_price", { precision: 12, scale: 2 }),
+  firstPurchaseDate: date("first_purchase_date"),
+  lastPurchaseDate: date("last_purchase_date"),
+  holdingPeriod: varchar("holding_period", { length: 50 }),
   returns: decimal("returns", { precision: 12, scale: 2 }).default("0"),
   returnsPercentage: decimal("returns_percentage", {
     precision: 5,

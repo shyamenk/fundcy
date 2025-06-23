@@ -44,10 +44,16 @@ interface InvestmentHolding {
   id: string;
   name: string;
   type: string;
+  units?: number;
+  currentPrice?: number;
+  avgPurchasePrice?: number;
   currentValue: number;
   totalInvested: number;
   returns: number;
   returnsPercentage: number;
+  firstPurchaseDate?: string;
+  lastPurchaseDate?: string;
+  holdingPeriod?: string;
   fundHouse?: string;
   category?: string;
   riskLevel?: string;
@@ -59,6 +65,7 @@ interface SIPInvestment {
   amount: number;
   frequency: string;
   startDate: string;
+  nextSipDate?: string;
   isActive: boolean;
   totalInvested: number;
   totalUnits: number;
@@ -100,7 +107,11 @@ export default function PortfolioPage() {
   const [holdingForm, setHoldingForm] = useState({
     name: "",
     type: "",
-    currentValue: "",
+    units: "",
+    currentPrice: "",
+    avgPurchasePrice: "",
+    firstPurchaseDate: "",
+    lastPurchaseDate: "",
     totalInvested: "",
     fundHouse: "",
     category: "",
@@ -112,6 +123,7 @@ export default function PortfolioPage() {
     amount: "",
     frequency: "",
     startDate: new Date().toISOString().slice(0, 10),
+    nextSipDate: new Date().toISOString().slice(0, 10),
     isActive: true,
     fundName: "",
   });
@@ -169,6 +181,33 @@ export default function PortfolioPage() {
   const activeSIPs = sipInvestments.filter(sip => sip.isActive);
   const totalSIPAmount = activeSIPs.reduce((sum, sip) => sum + sip.amount, 0);
 
+  const calculateCurrentValue = (units: string, currentPrice: string) => {
+    const u = parseFloat(units || "0");
+    const p = parseFloat(currentPrice || "0");
+    return u * p;
+  };
+
+  const calculateUnrealizedGain = (currentValue: number, totalInvested: string) => {
+    return currentValue - parseFloat(totalInvested || "0");
+  };
+
+  const calculateReturnPercentage = (gain: number, totalInvested: string) => {
+    const invested = parseFloat(totalInvested || "0");
+    return invested > 0 ? (gain / invested) * 100 : 0;
+  };
+
+  const calculateHoldingPeriod = (first: string, last: string) => {
+    if (!first || !last) return "";
+    const d1 = new Date(first);
+    const d2 = new Date(last);
+    const months = (d2.getFullYear() - d1.getFullYear()) * 12 + (d2.getMonth() - d1.getMonth());
+    if (months < 0) return "";
+    if (months < 12) return `${months} month${months !== 1 ? "s" : ""}`;
+    const years = Math.floor(months / 12);
+    const remMonths = months % 12;
+    return `${years} year${years !== 1 ? "s" : ""}${remMonths ? ` ${remMonths} month${remMonths !== 1 ? "s" : ""}` : ""}`;
+  };
+
   const handleAddInvestment = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -181,14 +220,24 @@ export default function PortfolioPage() {
       let payload;
       if (activeTab === "holding") {
         // Validate holding form
-        if (!holdingForm.name || !holdingForm.currentValue || !holdingForm.totalInvested) {
+        if (!holdingForm.name || !holdingForm.units || !holdingForm.currentPrice || !holdingForm.avgPurchasePrice || !holdingForm.totalInvested || !holdingForm.firstPurchaseDate || !holdingForm.lastPurchaseDate) {
           alert("Please fill in all required fields for the investment holding.");
           return;
         }
-
+        const currentValue = calculateCurrentValue(holdingForm.units, holdingForm.currentPrice);
+        const unrealizedGain = calculateUnrealizedGain(currentValue, holdingForm.totalInvested);
+        const returnPercentage = calculateReturnPercentage(unrealizedGain, holdingForm.totalInvested);
+        const holdingPeriod = calculateHoldingPeriod(holdingForm.firstPurchaseDate, holdingForm.lastPurchaseDate);
         payload = {
           ...holdingForm,
-          currentValue: parseFloat(holdingForm.currentValue || "0"),
+          units: parseFloat(holdingForm.units || "0"),
+          currentPrice: parseFloat(holdingForm.currentPrice || "0"),
+          avgPurchasePrice: parseFloat(holdingForm.avgPurchasePrice || "0"),
+          unrealizedGain,
+          returnPercentage,
+          holdingPeriod,
+          firstPurchaseDate: holdingForm.firstPurchaseDate,
+          lastPurchaseDate: holdingForm.lastPurchaseDate,
           totalInvested: parseFloat(holdingForm.totalInvested || "0"),
           operationType: activeTab,
         };
@@ -206,6 +255,7 @@ export default function PortfolioPage() {
         payload = {
           ...sipForm,
           amount: parseFloat(sipForm.amount || "0"),
+          nextSipDate: sipForm.nextSipDate,
           operationType: activeTab,
         };
       }
@@ -244,8 +294,12 @@ export default function PortfolioPage() {
       setHoldingForm({
         name: item.name,
         type: item.type,
-        currentValue: item.currentValue.toString(),
-        totalInvested: item.totalInvested.toString(),
+        units: item.units?.toString() || "",
+        currentPrice: item.currentPrice?.toString() || "",
+        avgPurchasePrice: item.avgPurchasePrice?.toString() || "",
+        firstPurchaseDate: item.firstPurchaseDate || "",
+        lastPurchaseDate: item.lastPurchaseDate || "",
+        totalInvested: item.totalInvested?.toString() || "",
         fundHouse: item.fundHouse || "",
         category: item.category || "",
         riskLevel: item.riskLevel || "",
@@ -253,10 +307,11 @@ export default function PortfolioPage() {
     } else {
       setSipForm({
         holdingId: item.holdingId,
-        amount: item.amount.toString(),
-        frequency: item.frequency,
-        startDate: item.startDate,
-        isActive: item.isActive,
+        amount: item.amount?.toString() || "",
+        frequency: item.frequency || "",
+        startDate: item.startDate || "",
+        nextSipDate: item.nextSipDate || new Date().toISOString().slice(0, 10),
+        isActive: item.isActive || true,
         fundName: item.fundName || "",
       });
     }
@@ -290,7 +345,11 @@ export default function PortfolioPage() {
     setHoldingForm({
       name: "",
       type: "",
-      currentValue: "",
+      units: "",
+      currentPrice: "",
+      avgPurchasePrice: "",
+      firstPurchaseDate: "",
+      lastPurchaseDate: "",
       totalInvested: "",
       fundHouse: "",
       category: "",
@@ -301,6 +360,7 @@ export default function PortfolioPage() {
       amount: "",
       frequency: "",
       startDate: new Date().toISOString().slice(0, 10),
+      nextSipDate: new Date().toISOString().slice(0, 10),
       isActive: true,
       fundName: "",
     });
@@ -387,23 +447,15 @@ export default function PortfolioPage() {
                       required
                       placeholder="e.g., HDFC Mid-Cap Opportunities Fund"
                       value={holdingForm.name}
-                      onChange={e =>
-                        setHoldingForm({
-                          ...holdingForm,
-                          name: e.target.value,
-                        })
-                      }
+                      onChange={e => setHoldingForm({ ...holdingForm, name: e.target.value })}
                     />
                   </div>
-
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="type">Type</Label>
                       <Select
                         value={holdingForm.type}
-                        onValueChange={value =>
-                          setHoldingForm({ ...holdingForm, type: value })
-                        }
+                        onValueChange={value => setHoldingForm({ ...holdingForm, type: value })}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select type" />
@@ -411,9 +463,7 @@ export default function PortfolioPage() {
                         <SelectContent>
                           {investmentTypes.map(type => (
                             <SelectItem key={type} value={type}>
-                              {type
-                                .replace("_", " ")
-                                .replace(/\b\w/g, l => l.toUpperCase())}
+                              {type.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase())}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -423,9 +473,7 @@ export default function PortfolioPage() {
                       <Label htmlFor="riskLevel">Risk Level</Label>
                       <Select
                         value={holdingForm.riskLevel}
-                        onValueChange={value =>
-                          setHoldingForm({ ...holdingForm, riskLevel: value })
-                        }
+                        onValueChange={value => setHoldingForm({ ...holdingForm, riskLevel: value })}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select risk level" />
@@ -440,23 +488,43 @@ export default function PortfolioPage() {
                       </Select>
                     </div>
                   </div>
-
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="currentValue">Current Value *</Label>
+                      <Label htmlFor="units">Number of Units/Shares *</Label>
                       <Input
-                        id="currentValue"
+                        id="units"
+                        type="number"
+                        step="0.0001"
+                        required
+                        placeholder="0.0000"
+                        value={holdingForm.units}
+                        onChange={e => setHoldingForm({ ...holdingForm, units: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="currentPrice">Current Price per Unit *</Label>
+                      <Input
+                        id="currentPrice"
                         type="number"
                         step="0.01"
                         required
                         placeholder="0.00"
-                        value={holdingForm.currentValue}
-                        onChange={e =>
-                          setHoldingForm({
-                            ...holdingForm,
-                            currentValue: e.target.value,
-                          })
-                        }
+                        value={holdingForm.currentPrice}
+                        onChange={e => setHoldingForm({ ...holdingForm, currentPrice: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="avgPurchasePrice">Average Purchase Price *</Label>
+                      <Input
+                        id="avgPurchasePrice"
+                        type="number"
+                        step="0.01"
+                        required
+                        placeholder="0.00"
+                        value={holdingForm.avgPurchasePrice}
+                        onChange={e => setHoldingForm({ ...holdingForm, avgPurchasePrice: e.target.value })}
                       />
                     </div>
                     <div className="space-y-2">
@@ -468,16 +536,10 @@ export default function PortfolioPage() {
                         required
                         placeholder="0.00"
                         value={holdingForm.totalInvested}
-                        onChange={e =>
-                          setHoldingForm({
-                            ...holdingForm,
-                            totalInvested: e.target.value,
-                          })
-                        }
+                        onChange={e => setHoldingForm({ ...holdingForm, totalInvested: e.target.value })}
                       />
                     </div>
                   </div>
-
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="fundHouse">Fund House</Label>
@@ -485,12 +547,7 @@ export default function PortfolioPage() {
                         id="fundHouse"
                         placeholder="e.g., HDFC Mutual Fund"
                         value={holdingForm.fundHouse}
-                        onChange={e =>
-                          setHoldingForm({
-                            ...holdingForm,
-                            fundHouse: e.target.value,
-                          })
-                        }
+                        onChange={e => setHoldingForm({ ...holdingForm, fundHouse: e.target.value })}
                       />
                     </div>
                     <div className="space-y-2">
@@ -499,12 +556,64 @@ export default function PortfolioPage() {
                         id="category"
                         placeholder="e.g., Mid Cap, Large Cap"
                         value={holdingForm.category}
-                        onChange={e =>
-                          setHoldingForm({
-                            ...holdingForm,
-                            category: e.target.value,
-                          })
-                        }
+                        onChange={e => setHoldingForm({ ...holdingForm, category: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstPurchaseDate">First Purchase Date *</Label>
+                      <Input
+                        id="firstPurchaseDate"
+                        type="date"
+                        required
+                        value={holdingForm.firstPurchaseDate}
+                        onChange={e => setHoldingForm({ ...holdingForm, firstPurchaseDate: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastPurchaseDate">Last Purchase Date *</Label>
+                      <Input
+                        id="lastPurchaseDate"
+                        type="date"
+                        required
+                        value={holdingForm.lastPurchaseDate}
+                        onChange={e => setHoldingForm({ ...holdingForm, lastPurchaseDate: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Current Value</Label>
+                      <Input
+                        value={formatINR(calculateCurrentValue(holdingForm.units, holdingForm.currentPrice))}
+                        readOnly
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Unrealized Gain/Loss</Label>
+                      <Input
+                        value={formatINR(calculateUnrealizedGain(calculateCurrentValue(holdingForm.units, holdingForm.currentPrice), holdingForm.totalInvested))}
+                        readOnly
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Return Percentage</Label>
+                      <Input
+                        value={calculateReturnPercentage(
+                          calculateUnrealizedGain(calculateCurrentValue(holdingForm.units, holdingForm.currentPrice), holdingForm.totalInvested),
+                          holdingForm.totalInvested
+                        ).toFixed(2) + "%"}
+                        readOnly
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Holding Period</Label>
+                      <Input
+                        value={calculateHoldingPeriod(holdingForm.firstPurchaseDate, holdingForm.lastPurchaseDate)}
+                        readOnly
                       />
                     </div>
                   </div>
@@ -596,6 +705,18 @@ export default function PortfolioPage() {
                       value={sipForm.startDate}
                       onChange={e =>
                         setSipForm({ ...sipForm, startDate: e.target.value })
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="nextSipDate">Next SIP Date</Label>
+                    <Input
+                      id="nextSipDate"
+                      type="date"
+                      value={sipForm.nextSipDate}
+                      onChange={e =>
+                        setSipForm({ ...sipForm, nextSipDate: e.target.value })
                       }
                     />
                   </div>
@@ -711,6 +832,9 @@ export default function PortfolioPage() {
                         {holding.fundHouse && `${holding.fundHouse}`}
                         {holding.category && ` • ${holding.category}`}
                         {holding.riskLevel && ` • ${holding.riskLevel}`}
+                        {holding.units && ` • ${holding.units.toFixed(4)} units`}
+                        {holding.currentPrice && ` • ₹${holding.currentPrice}/unit`}
+                        {holding.holdingPeriod && ` • ${holding.holdingPeriod}`}
                       </p>
                     </div>
                     <div className="text-right">
@@ -782,6 +906,7 @@ export default function PortfolioPage() {
                       <p className="text-sm text-muted-foreground">
                         {sip.fundName && `${sip.fundName} • `}
                         {formatINR(sip.amount)} • {sip.frequency} • Started {new Date(sip.startDate).toLocaleDateString()}
+                        {sip.nextSipDate && ` • Next: ${new Date(sip.nextSipDate).toLocaleDateString()}`}
                       </p>
                     </div>
                     <div className="text-right">

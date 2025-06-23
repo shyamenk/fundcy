@@ -47,13 +47,16 @@ export async function POST(request: NextRequest) {
 
     if (operationType === "holding") {
       // Validate required fields for holdings
-      if (!data.name || !data.currentValue || !data.totalInvested) {
+      if (!data.name || !data.units || !data.currentPrice || !data.avgPurchasePrice || !data.totalInvested || !data.firstPurchaseDate || !data.lastPurchaseDate) {
         return NextResponse.json({ error: "Missing required fields for holding" }, { status: 400 })
       }
 
-      // Calculate returns for holdings
-      const currentValue = parseFloat(data.currentValue || "0")
+      // Calculate values
+      const units = parseFloat(data.units || "0")
+      const currentPrice = parseFloat(data.currentPrice || "0")
+      const avgPurchasePrice = parseFloat(data.avgPurchasePrice || "0")
       const totalInvested = parseFloat(data.totalInvested || "0")
+      const currentValue = units * currentPrice
       const returns = currentValue - totalInvested
       const returnsPercentage = totalInvested > 0 ? (returns / totalInvested) * 100 : 0
 
@@ -62,8 +65,14 @@ export async function POST(request: NextRequest) {
         .values({
           name: data.name,
           type: data.type || "other",
+          units: units.toString(),
+          currentPrice: currentPrice.toString(),
+          avgPurchasePrice: avgPurchasePrice.toString(),
           currentValue: currentValue.toString(),
           totalInvested: totalInvested.toString(),
+          firstPurchaseDate: data.firstPurchaseDate,
+          lastPurchaseDate: data.lastPurchaseDate,
+          holdingPeriod: data.holdingPeriod || null,
           returns: returns.toString(),
           returnsPercentage: returnsPercentage.toString(),
           fundHouse: data.fundHouse || null,
@@ -97,6 +106,7 @@ export async function POST(request: NextRequest) {
           amount: parseFloat(data.amount || "0").toString(),
           frequency: data.frequency,
           startDate: data.startDate,
+          nextSipDate: data.nextSipDate || null,
           isActive: data.isActive !== undefined ? data.isActive : true,
           totalInvested: "0", // Will be calculated over time
           totalUnits: "0", // Will be calculated over time

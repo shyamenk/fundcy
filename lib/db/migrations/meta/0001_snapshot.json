@@ -1,5 +1,5 @@
 {
-  "id": "5a900d06-a1e8-41d4-b5b3-00bda8732181",
+  "id": "dfe2646c-1a74-4a72-ba15-8b5b1e9d95f6",
   "prevId": "8835043f-89e6-4fde-9712-75ba48788e88",
   "version": "7",
   "dialect": "postgresql",
@@ -538,6 +538,24 @@
         "current_price": {
           "name": "current_price",
           "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "first_purchase_date": {
+          "name": "first_purchase_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_purchase_date": {
+          "name": "last_purchase_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "holding_period": {
+          "name": "holding_period",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": false
         },

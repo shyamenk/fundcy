@@ -7,7 +7,7 @@ import { authOptions } from "@/lib/auth"
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -16,19 +16,48 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const { id } = await params
     const body = await request.json()
     const { operationType, ...data } = body
 
     if (operationType === "holding") {
+      // Validate required fields for holdings
+      if (!data.name || !data.units || !data.currentPrice || !data.avgPurchasePrice || !data.totalInvested || !data.firstPurchaseDate || !data.lastPurchaseDate) {
+        return NextResponse.json({ error: "Missing required fields for holding" }, { status: 400 })
+      }
+
+      // Calculate values
+      const units = parseFloat(data.units || "0")
+      const currentPrice = parseFloat(data.currentPrice || "0")
+      const avgPurchasePrice = parseFloat(data.avgPurchasePrice || "0")
+      const totalInvested = parseFloat(data.totalInvested || "0")
+      const currentValue = units * currentPrice
+      const returns = currentValue - totalInvested
+      const returnsPercentage = totalInvested > 0 ? (returns / totalInvested) * 100 : 0
+
       const updatedHolding = await db
         .update(investmentHoldings)
         .set({
-          ...data,
+          name: data.name,
+          type: data.type || "other",
+          units: units.toString(),
+          currentPrice: currentPrice.toString(),
+          avgPurchasePrice: avgPurchasePrice.toString(),
+          currentValue: currentValue.toString(),
+          totalInvested: totalInvested.toString(),
+          firstPurchaseDate: data.firstPurchaseDate,
+          lastPurchaseDate: data.lastPurchaseDate,
+          holdingPeriod: data.holdingPeriod || null,
+          returns: returns.toString(),
+          returnsPercentage: returnsPercentage.toString(),
+          fundHouse: data.fundHouse || null,
+          category: data.category || null,
+          riskLevel: data.riskLevel || null,
           updatedAt: new Date(),
         })
         .where(
           and(
-            eq(investmentHoldings.id, params.id),
+            eq(investmentHoldings.id, id),
             eq(investmentHoldings.userId, session.user.id)
           )
         )
@@ -46,12 +75,18 @@ export async function PUT(
       const updatedSip = await db
         .update(sipInvestments)
         .set({
-          ...data,
+          holdingId: data.holdingId,
+          amount: parseFloat(data.amount || "0").toString(),
+          frequency: data.frequency,
+          startDate: data.startDate,
+          nextSipDate: data.nextSipDate || null,
+          isActive: data.isActive !== undefined ? data.isActive : true,
+          fundName: data.fundName || null,
           updatedAt: new Date(),
         })
         .where(
           and(
-            eq(sipInvestments.id, params.id),
+            eq(sipInvestments.id, id),
             eq(sipInvestments.userId, session.user.id)
           )
         )
@@ -75,7 +110,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -84,6 +119,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const { id } = await params
     const { searchParams } = new URL(request.url)
     const operationType = searchParams.get("operationType")
 
@@ -92,7 +128,7 @@ export async function DELETE(
         .delete(investmentHoldings)
         .where(
           and(
-            eq(investmentHoldings.id, params.id),
+            eq(investmentHoldings.id, id),
             eq(investmentHoldings.userId, session.user.id)
           )
         )
@@ -109,7 +145,7 @@ export async function DELETE(
         .delete(sipInvestments)
         .where(
           and(
-            eq(sipInvestments.id, params.id),
+            eq(sipInvestments.id, id),
             eq(sipInvestments.userId, session.user.id)
           )
         )
