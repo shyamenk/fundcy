@@ -13,30 +13,14 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { name, email } = await request.json()
+    const { name, image } = await request.json()
 
     // Validate input
-    if (!name || !email) {
+    if (!name) {
       return NextResponse.json(
-        { error: "Name and email are required" },
+        { error: "Name is required" },
         { status: 400 }
       )
-    }
-
-    // Check if email is already taken by another user
-    if (email !== session.user.email) {
-      const existingUser = await db
-        .select()
-        .from(users)
-        .where(eq(users.email, email))
-        .then(res => res[0])
-
-      if (existingUser) {
-        return NextResponse.json(
-          { error: "Email is already taken" },
-          { status: 409 }
-        )
-      }
     }
 
     // Update user
@@ -44,7 +28,7 @@ export async function PUT(request: NextRequest) {
       .update(users)
       .set({
         name,
-        email,
+        image: image || null,
         updatedAt: new Date(),
       })
       .where(eq(users.email, session.user.email))
@@ -57,12 +41,39 @@ export async function PUT(request: NextRequest) {
           id: updatedUser[0].id,
           email: updatedUser[0].email,
           name: updatedUser[0].name,
+          image: updatedUser[0].image,
         },
       },
       { status: 200 }
     )
   } catch (error) {
     console.error("Profile update error:", error)
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE() {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Delete user (cascade will handle related records)
+    await db
+      .delete(users)
+      .where(eq(users.email, session.user.email))
+
+    return NextResponse.json(
+      { message: "Account deleted successfully" },
+      { status: 200 }
+    )
+  } catch (error) {
+    console.error("Account deletion error:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
