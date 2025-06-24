@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { goals, goalContributions, transactions } from "@/lib/db/schema"
 import { eq, and, gte, lte, desc, sql } from "drizzle-orm"
@@ -6,6 +8,15 @@ import { format, subMonths, startOfYear, endOfYear } from "date-fns"
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Authentication required" },
+        { status: 401 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const year = searchParams.get("year") || new Date().getFullYear().toString()
     const status = searchParams.get("status") // active, completed, paused
@@ -14,7 +25,7 @@ export async function GET(request: NextRequest) {
     const endDate = endOfYear(new Date(parseInt(year), 0, 1))
 
     // Build query conditions
-    const conditions = []
+    const conditions = [eq(goals.userId, session.user.id)]
     if (status) {
       conditions.push(eq(goals.status, status as any))
     }
@@ -35,7 +46,7 @@ export async function GET(request: NextRequest) {
         completedAt: goals.completedAt,
       })
       .from(goals)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .where(and(...conditions))
       .orderBy(desc(goals.createdAt))
 
     // Get goal contributions for the year
@@ -56,6 +67,7 @@ export async function GET(request: NextRequest) {
       )
       .where(
         and(
+          eq(goalContributions.userId, session.user.id),
           gte(goalContributions.createdAt, startDate),
           lte(goalContributions.createdAt, endDate)
         )

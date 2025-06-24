@@ -1,7 +1,7 @@
 import "dotenv/config"
 import { db } from "./index"
-import { investmentHoldings, sipInvestments } from "./schema"
-import { subMonths, format } from "date-fns"
+import { investmentHoldings, sipInvestments, users } from "./schema"
+import { eq } from "drizzle-orm"
 
 const sampleHoldings = [
   {
@@ -13,6 +13,9 @@ const sampleHoldings = [
     units: "1000",
     avgPurchasePrice: "120",
     currentPrice: "150",
+    firstPurchaseDate: "2023-01-15",
+    lastPurchaseDate: "2023-12-15",
+    holdingPeriod: "11 months",
     returns: "30000",
     returnsPercentage: "25.00",
     fundHouse: "HDFC Mutual Fund",
@@ -28,6 +31,9 @@ const sampleHoldings = [
     units: "800",
     avgPurchasePrice: "75",
     currentPrice: "100",
+    firstPurchaseDate: "2023-02-01",
+    lastPurchaseDate: "2023-11-01",
+    holdingPeriod: "9 months",
     returns: "20000",
     returnsPercentage: "33.33",
     fundHouse: "Axis Mutual Fund",
@@ -43,6 +49,9 @@ const sampleHoldings = [
     units: "2000",
     avgPurchasePrice: "90",
     currentPrice: "100",
+    firstPurchaseDate: "2023-01-01",
+    lastPurchaseDate: "2023-12-01",
+    holdingPeriod: "11 months",
     returns: "20000",
     returnsPercentage: "11.11",
     fundHouse: "ICICI Prudential",
@@ -58,6 +67,9 @@ const sampleHoldings = [
     units: "100",
     avgPurchasePrice: "600",
     currentPrice: "750",
+    firstPurchaseDate: "2023-03-15",
+    lastPurchaseDate: "2023-10-15",
+    holdingPeriod: "7 months",
     returns: "15000",
     returnsPercentage: "25.00",
     fundHouse: "Direct Stock",
@@ -73,6 +85,9 @@ const sampleHoldings = [
     units: "200",
     avgPurchasePrice: "500",
     currentPrice: "600",
+    firstPurchaseDate: "2023-02-01",
+    lastPurchaseDate: "2023-09-01",
+    holdingPeriod: "7 months",
     returns: "20000",
     returnsPercentage: "20.00",
     fundHouse: "Direct Stock",
@@ -111,22 +126,54 @@ const sampleSIPs = [
   },
 ]
 
-async function seedInvestments() {
+async function seedInvestments(userEmail?: string) {
   try {
     console.log("🌱 Seeding database with sample investments...")
 
-    // Insert holdings
+    // Get user ID (either from parameter or first user in database)
+    let userId: string
+    if (userEmail) {
+      const user = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.email, userEmail))
+        .then(res => res[0])
+      
+      if (!user) {
+        console.error(`User with email ${userEmail} not found`)
+        return
+      }
+      userId = user.id
+    } else {
+      // Get first user from database
+      const firstUser = await db
+        .select({ id: users.id })
+        .from(users)
+        .limit(1)
+        .then(res => res[0])
+      
+      if (!firstUser) {
+        console.error("No users found in database. Please create a user first.")
+        return
+      }
+      userId = firstUser.id
+    }
+
+    // Insert holdings with userId
     const insertedHoldings = []
     for (const holding of sampleHoldings) {
       const [inserted] = await db
         .insert(investmentHoldings)
-        .values(holding)
+        .values({
+          ...holding,
+          userId,
+        })
         .returning()
       insertedHoldings.push(inserted)
     }
 
     // Insert SIPs (linking to holdings)
-    for (let i = 0; i < sampleSIPs.length; i++) {
+    for (let i = 0; i < sampleSIPs.length && i < insertedHoldings.length; i++) {
       const sip = sampleSIPs[i]
       const holdingId = insertedHoldings[i]?.id
 
@@ -136,6 +183,7 @@ async function seedInvestments() {
           .values({
             ...sip,
             holdingId: holdingId,
+            userId,
           })
           .onConflictDoNothing()
       }
@@ -148,4 +196,6 @@ async function seedInvestments() {
   }
 }
 
-seedInvestments()
+// Allow passing email as command line argument
+const userEmail = process.argv[2]
+seedInvestments(userEmail)

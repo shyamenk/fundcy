@@ -22,8 +22,19 @@ export async function PUT(
 
     if (operationType === "holding") {
       // Validate required fields for holdings
-      if (!data.name || !data.units || !data.currentPrice || !data.avgPurchasePrice || !data.totalInvested || !data.firstPurchaseDate || !data.lastPurchaseDate) {
-        return NextResponse.json({ error: "Missing required fields for holding" }, { status: 400 })
+      if (
+        !data.name ||
+        !data.units ||
+        !data.currentPrice ||
+        !data.avgPurchasePrice ||
+        !data.totalInvested ||
+        !data.firstPurchaseDate ||
+        !data.lastPurchaseDate
+      ) {
+        return NextResponse.json(
+          { error: "Missing required fields for holding" },
+          { status: 400 }
+        )
       }
 
       // Calculate values
@@ -33,7 +44,8 @@ export async function PUT(
       const totalInvested = parseFloat(data.totalInvested || "0")
       const currentValue = units * currentPrice
       const returns = currentValue - totalInvested
-      const returnsPercentage = totalInvested > 0 ? (returns / totalInvested) * 100 : 0
+      const returnsPercentage =
+        totalInvested > 0 ? (returns / totalInvested) * 100 : 0
 
       const updatedHolding = await db
         .update(investmentHoldings)
@@ -72,6 +84,19 @@ export async function PUT(
 
       return NextResponse.json(updatedHolding[0])
     } else if (operationType === "sip") {
+      // Validate required fields for SIPs
+      if (
+        !data.holdingId ||
+        !data.amount ||
+        !data.frequency ||
+        !data.startDate
+      ) {
+        return NextResponse.json(
+          { error: "Missing required fields for SIP" },
+          { status: 400 }
+        )
+      }
+
       const updatedSip = await db
         .update(sipInvestments)
         .set({
@@ -99,10 +124,17 @@ export async function PUT(
       return NextResponse.json(updatedSip[0])
     }
 
-    return NextResponse.json({ error: "Invalid type" }, { status: 400 })
-  } catch (error) {
     return NextResponse.json(
-      { error: "Failed to update investment" },
+      { error: "Invalid operation type" },
+      { status: 400 }
+    )
+  } catch (error) {
+    console.error("Error updating investment:", error)
+    return NextResponse.json(
+      {
+        error: "Failed to update investment",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     )
   }
@@ -140,6 +172,8 @@ export async function DELETE(
           { status: 404 }
         )
       }
+
+      return NextResponse.json({ message: "Holding deleted successfully" })
     } else if (operationType === "sip") {
       const deletedSip = await db
         .delete(sipInvestments)
@@ -154,14 +188,21 @@ export async function DELETE(
       if (deletedSip.length === 0) {
         return NextResponse.json({ error: "SIP not found" }, { status: 404 })
       }
-    } else {
-      return NextResponse.json({ error: "Invalid type" }, { status: 400 })
+
+      return NextResponse.json({ message: "SIP deleted successfully" })
     }
 
-    return NextResponse.json({ success: true })
-  } catch (error) {
     return NextResponse.json(
-      { error: "Failed to delete investment" },
+      { error: "Invalid operation type" },
+      { status: 400 }
+    )
+  } catch (error) {
+    console.error("Error deleting investment:", error)
+    return NextResponse.json(
+      {
+        error: "Failed to delete investment",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     )
   }

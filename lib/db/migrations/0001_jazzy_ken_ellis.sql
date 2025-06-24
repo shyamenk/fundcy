@@ -1,0 +1,2 @@
+ALTER TABLE "investment_holdings" ALTER COLUMN "returns_percentage" SET DATA TYPE numeric(7, 2);--> statement-breakpoint
+ALTER TABLE "investment_holdings" ALTER COLUMN "returns_percentage" SET DEFAULT '0';

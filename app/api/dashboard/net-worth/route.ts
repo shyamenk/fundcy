@@ -1,17 +1,29 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { transactions } from "@/lib/db/schema"
-import { desc } from "drizzle-orm"
+import { eq, desc } from "drizzle-orm"
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Authentication required" },
+        { status: 401 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const months = parseInt(searchParams.get("months") || "12") // Default to 12 months of history
 
-    // Get all transactions
+    // Get all transactions for the user
     const allTransactions = await db
       .select()
       .from(transactions)
+      .where(eq(transactions.userId, session.user.id))
       .orderBy(desc(transactions.date))
 
     // Calculate current net worth

@@ -2,13 +2,24 @@ import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { goals } from "@/lib/db/schema"
 import { goalCompleteSchema } from "@/lib/validations/goal"
-import { eq } from "drizzle-orm"
+import { eq, and } from "drizzle-orm"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Authentication required" },
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
     const validatedData = goalCompleteSchema.parse({ ...body, id: params.id })
 
@@ -21,7 +32,7 @@ export async function POST(
           : new Date(),
         updatedAt: new Date(),
       })
-      .where(eq(goals.id, params.id))
+      .where(and(eq(goals.id, params.id), eq(goals.userId, session.user.id)))
       .returning()
 
     if (completedGoal.length === 0) {

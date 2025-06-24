@@ -8,7 +8,6 @@ import {
   timestamp,
   boolean,
   pgEnum,
-  text,
   index,
 } from "drizzle-orm/pg-core"
 import { relations } from "drizzle-orm"
@@ -63,72 +62,22 @@ export const users = pgTable(
   })
 )
 
-export const accounts = pgTable(
-  "accounts",
+export const categories = pgTable(
+  "categories",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    type: varchar("type", { length: 255 }).notNull(),
-    provider: varchar("provider", { length: 255 }).notNull(),
-    providerAccountId: varchar("provider_account_id", {
-      length: 255,
-    }).notNull(),
-    refresh_token: text("refresh_token"),
-    access_token: text("access_token"),
-    expires_at: timestamp("expires_at", { withTimezone: true }),
-    token_type: varchar("token_type", { length: 255 }),
-    scope: varchar("scope", { length: 255 }),
-    id_token: text("id_token"),
-    session_state: varchar("session_state", { length: 255 }),
+    name: varchar("name", { length: 100 }).notNull(),
+    type: transactionTypeEnum("type").notNull(),
+    color: varchar("color", { length: 7 }),
+    icon: varchar("icon", { length: 50 }),
+    isDefault: boolean("is_default").default(false),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   },
   table => ({
-    userIdIdx: index("user_id_idx").on(table.userId),
-    providerAccountIdIdx: index("provider_account_id_idx").on(
-      table.providerAccountId
-    ),
+    nameTypeIdx: index("name_type_idx").on(table.name, table.type),
   })
 )
-
-export const sessions = pgTable(
-  "sessions",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    sessionToken: varchar("session_token", { length: 255 }).notNull().unique(),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    expires: timestamp("expires", { withTimezone: true }).notNull(),
-  },
-  table => ({
-    sessionTokenIdx: index("session_token_idx").on(table.sessionToken),
-    sessionsUserIdIdx: index("sessions_user_id_idx").on(table.userId),
-  })
-)
-
-export const verificationTokens = pgTable(
-  "verification_tokens",
-  {
-    identifier: varchar("identifier", { length: 255 }).notNull(),
-    token: varchar("token", { length: 255 }).notNull().unique(),
-    expires: timestamp("expires", { withTimezone: true }).notNull(),
-  },
-  table => ({
-    tokenIdx: index("token_idx").on(table.token),
-  })
-)
-
-export const categories = pgTable("categories", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: varchar("name", { length: 100 }).notNull(),
-  type: transactionTypeEnum("type").notNull(),
-  color: varchar("color", { length: 7 }),
-  icon: varchar("icon", { length: 50 }),
-  isDefault: boolean("is_default").default(false),
-  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-})
 
 export const transactions = pgTable("transactions", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -136,7 +85,9 @@ export const transactions = pgTable("transactions", {
   amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
   description: varchar("description", { length: 255 }).notNull(),
   categoryId: uuid("category_id").references(() => categories.id),
-  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   date: date("date").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
@@ -153,7 +104,9 @@ export const goals = pgTable("goals", {
   targetDate: date("target_date"),
   category: varchar("category", { length: 100 }),
   status: goalStatusEnum("status").default("active"),
-  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   completedAt: timestamp("completed_at", { withTimezone: true }),
@@ -166,6 +119,9 @@ export const goalContributions = pgTable("goal_contributions", {
     onDelete: "cascade",
   }),
   amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 })
 
@@ -187,13 +143,15 @@ export const investmentHoldings = pgTable("investment_holdings", {
   holdingPeriod: varchar("holding_period", { length: 50 }),
   returns: decimal("returns", { precision: 12, scale: 2 }).default("0"),
   returnsPercentage: decimal("returns_percentage", {
-    precision: 5,
+    precision: 7,
     scale: 2,
   }).default("0"),
   fundHouse: varchar("fund_house", { length: 255 }),
   category: varchar("category", { length: 100 }),
   riskLevel: varchar("risk_level", { length: 50 }),
-  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 })
@@ -214,7 +172,9 @@ export const sipInvestments = pgTable("sip_investments", {
   ),
   totalUnits: decimal("total_units", { precision: 10, scale: 4 }).default("0"),
   fundName: varchar("fund_name", { length: 255 }),
-  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 })
@@ -227,32 +187,22 @@ export const debitCardExpenses = pgTable("debit_card_expenses", {
   category: varchar("category", { length: 100 }),
   cardType: varchar("card_type", { length: 50 }),
   transactionDate: date("transaction_date").notNull(),
-  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 })
 
 // Define relationships
 export const usersRelations = relations(users, ({ many }) => ({
-  accounts: many(accounts),
-  sessions: many(sessions),
   categories: many(categories),
   transactions: many(transactions),
   goals: many(goals),
-}))
-
-export const accountsRelations = relations(accounts, ({ one }) => ({
-  user: one(users, {
-    fields: [accounts.userId],
-    references: [users.id],
-  }),
-}))
-
-export const sessionsRelations = relations(sessions, ({ one }) => ({
-  user: one(users, {
-    fields: [sessions.userId],
-    references: [users.id],
-  }),
+  goalContributions: many(goalContributions),
+  investmentHoldings: many(investmentHoldings),
+  sipInvestments: many(sipInvestments),
+  debitCardExpenses: many(debitCardExpenses),
 }))
 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
@@ -285,6 +235,10 @@ export const goalsRelations = relations(goals, ({ one, many }) => ({
 export const goalContributionsRelations = relations(
   goalContributions,
   ({ one }) => ({
+    user: one(users, {
+      fields: [goalContributions.userId],
+      references: [users.id],
+    }),
     goal: one(goals, {
       fields: [goalContributions.goalId],
       references: [goals.id],
@@ -331,9 +285,6 @@ export const debitCardExpensesRelations = relations(
 // Export all schema elements for Drizzle
 export const schema = {
   users,
-  accounts,
-  sessions,
-  verificationTokens,
   categories,
   transactions,
   goals,
@@ -346,8 +297,6 @@ export const schema = {
   investmentTypeEnum,
   sipFrequencyEnum,
   usersRelations,
-  accountsRelations,
-  sessionsRelations,
   categoriesRelations,
   transactionsRelations,
   goalsRelations,

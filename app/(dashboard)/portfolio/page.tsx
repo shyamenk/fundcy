@@ -73,6 +73,11 @@ interface SIPInvestment {
   holding: InvestmentHolding;
 }
 
+interface EditingItem {
+  type: "holding" | "sip";
+  data: InvestmentHolding | SIPInvestment;
+}
+
 const investmentTypes = [
   "mutual_fund",
   "direct_stocks",
@@ -97,10 +102,7 @@ export default function PortfolioPage() {
   const [loading, setLoading] = useState(true);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editingItem, setEditingItem] = useState<{
-    type: "holding" | "sip";
-    data: any;
-  } | null>(null);
+  const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"holding" | "sip">("holding");
 
@@ -138,20 +140,27 @@ export default function PortfolioPage() {
       const data = await response.json();
 
       // Convert string values to numbers for calculations
-      const processedHoldings = (data.holdings || []).map((holding: any) => ({
-        ...holding,
-        currentValue: parseFloat(holding.currentValue),
-        totalInvested: parseFloat(holding.totalInvested),
-        returns: parseFloat(holding.returns),
-        returnsPercentage: parseFloat(holding.returnsPercentage),
-      }));
+      const processedHoldings = (data.holdings || []).map(
+        (holding: InvestmentHolding) => ({
+          ...holding,
+          currentValue: parseFloat(String(holding.currentValue)),
+          totalInvested: parseFloat(String(holding.totalInvested)),
+          returns: parseFloat(String(holding.returns)),
+          returnsPercentage: parseFloat(String(holding.returnsPercentage)),
+          units: holding.units ? parseFloat(String(holding.units)) : undefined,
+          currentPrice: holding.currentPrice ? parseFloat(String(holding.currentPrice)) : undefined,
+          avgPurchasePrice: holding.avgPurchasePrice ? parseFloat(String(holding.avgPurchasePrice)) : undefined,
+        })
+      );
 
-      const processedSIPs = (data.sips || []).map((sip: any) => ({
+      const processedSIPs = (data.sips || []).map((sip: SIPInvestment) => ({
         ...sip,
-        amount: parseFloat(sip.amount),
-        totalInvested: parseFloat(sip.totalInvested),
-        totalUnits: parseFloat(sip.totalUnits),
-        holding: processedHoldings.find((h: any) => h.id === sip.holdingId),
+        amount: parseFloat(String(sip.amount)),
+        totalInvested: parseFloat(String(sip.totalInvested)),
+        totalUnits: parseFloat(String(sip.totalUnits)),
+        holding: processedHoldings.find(
+          (h: InvestmentHolding) => h.id === sip.holdingId
+        ),
       }));
 
       setHoldings(processedHoldings);
@@ -187,7 +196,10 @@ export default function PortfolioPage() {
     return u * p;
   };
 
-  const calculateUnrealizedGain = (currentValue: number, totalInvested: string) => {
+  const calculateUnrealizedGain = (
+    currentValue: number,
+    totalInvested: string
+  ) => {
     return currentValue - parseFloat(totalInvested || "0");
   };
 
@@ -200,7 +212,9 @@ export default function PortfolioPage() {
     if (!first || !last) return "";
     const d1 = new Date(first);
     const d2 = new Date(last);
-    const months = (d2.getFullYear() - d1.getFullYear()) * 12 + (d2.getMonth() - d1.getMonth());
+    const months =
+      (d2.getFullYear() - d1.getFullYear()) * 12 +
+      (d2.getMonth() - d1.getMonth());
     if (months < 0) return "";
     if (months < 12) return `${months} month${months !== 1 ? "s" : ""}`;
     const years = Math.floor(months / 12);
@@ -220,14 +234,36 @@ export default function PortfolioPage() {
       let payload;
       if (activeTab === "holding") {
         // Validate holding form
-        if (!holdingForm.name || !holdingForm.units || !holdingForm.currentPrice || !holdingForm.avgPurchasePrice || !holdingForm.totalInvested || !holdingForm.firstPurchaseDate || !holdingForm.lastPurchaseDate) {
-          alert("Please fill in all required fields for the investment holding.");
+        if (
+          !holdingForm.name ||
+          !holdingForm.units ||
+          !holdingForm.currentPrice ||
+          !holdingForm.avgPurchasePrice ||
+          !holdingForm.totalInvested ||
+          !holdingForm.firstPurchaseDate ||
+          !holdingForm.lastPurchaseDate
+        ) {
+          alert(
+            "Please fill in all required fields for the investment holding."
+          );
           return;
         }
-        const currentValue = calculateCurrentValue(holdingForm.units, holdingForm.currentPrice);
-        const unrealizedGain = calculateUnrealizedGain(currentValue, holdingForm.totalInvested);
-        const returnPercentage = calculateReturnPercentage(unrealizedGain, holdingForm.totalInvested);
-        const holdingPeriod = calculateHoldingPeriod(holdingForm.firstPurchaseDate, holdingForm.lastPurchaseDate);
+        const currentValue = calculateCurrentValue(
+          holdingForm.units,
+          holdingForm.currentPrice
+        );
+        const unrealizedGain = calculateUnrealizedGain(
+          currentValue,
+          holdingForm.totalInvested
+        );
+        const returnPercentage = calculateReturnPercentage(
+          unrealizedGain,
+          holdingForm.totalInvested
+        );
+        const holdingPeriod = calculateHoldingPeriod(
+          holdingForm.firstPurchaseDate,
+          holdingForm.lastPurchaseDate
+        );
         payload = {
           ...holdingForm,
           units: parseFloat(holdingForm.units || "0"),
@@ -247,7 +283,12 @@ export default function PortfolioPage() {
           alert("Please add an investment holding first before creating a SIP.");
           return;
         }
-        if (!sipForm.holdingId || !sipForm.amount || !sipForm.frequency || !sipForm.startDate) {
+        if (
+          !sipForm.holdingId ||
+          !sipForm.amount ||
+          !sipForm.frequency ||
+          !sipForm.startDate
+        ) {
           alert("Please fill in all required fields for the SIP investment.");
           return;
         }
@@ -277,42 +318,51 @@ export default function PortfolioPage() {
       } else {
         const errorData = await response.json();
         console.error("Error response:", errorData);
-        alert(`Failed to ${isEditing ? 'update' : 'create'} investment: ${errorData.error}`);
+        alert(
+          `Failed to ${isEditing ? "update" : "create"} investment: ${errorData.error}`
+        );
       }
     } catch (error) {
       console.error("Error saving investment:", error);
-      alert(`Error saving investment: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      alert(
+        `Error saving investment: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
     }
   };
 
-  const handleEdit = (type: "holding" | "sip", item: any) => {
+  const handleEdit = (
+    type: "holding" | "sip",
+    item: InvestmentHolding | SIPInvestment
+  ) => {
     setIsEditing(true);
     setEditingItem({ type, data: item });
     setActiveTab(type);
 
     if (type === "holding") {
+      const holding = item as InvestmentHolding;
       setHoldingForm({
-        name: item.name,
-        type: item.type,
-        units: item.units?.toString() || "",
-        currentPrice: item.currentPrice?.toString() || "",
-        avgPurchasePrice: item.avgPurchasePrice?.toString() || "",
-        firstPurchaseDate: item.firstPurchaseDate || "",
-        lastPurchaseDate: item.lastPurchaseDate || "",
-        totalInvested: item.totalInvested?.toString() || "",
-        fundHouse: item.fundHouse || "",
-        category: item.category || "",
-        riskLevel: item.riskLevel || "",
+        name: holding.name,
+        type: holding.type,
+        units: holding.units?.toString() || "",
+        currentPrice: holding.currentPrice?.toString() || "",
+        avgPurchasePrice: holding.avgPurchasePrice?.toString() || "",
+        firstPurchaseDate: holding.firstPurchaseDate || "",
+        lastPurchaseDate: holding.lastPurchaseDate || "",
+        totalInvested: holding.totalInvested?.toString() || "",
+        fundHouse: holding.fundHouse || "",
+        category: holding.category || "",
+        riskLevel: holding.riskLevel || "",
       });
     } else {
+      const sip = item as SIPInvestment;
       setSipForm({
-        holdingId: item.holdingId,
-        amount: item.amount?.toString() || "",
-        frequency: item.frequency || "",
-        startDate: item.startDate || "",
-        nextSipDate: item.nextSipDate || new Date().toISOString().slice(0, 10),
-        isActive: item.isActive || true,
-        fundName: item.fundName || "",
+        holdingId: sip.holdingId,
+        amount: sip.amount?.toString() || "",
+        frequency: sip.frequency || "",
+        startDate: sip.startDate || "",
+        nextSipDate: sip.nextSipDate || new Date().toISOString().slice(0, 10),
+        isActive: sip.isActive || true,
+        fundName: sip.fundName || "",
       });
     }
 
@@ -428,7 +478,9 @@ export default function PortfolioPage() {
                 size="sm"
                 onClick={() => setActiveTab("sip")}
                 disabled={holdings.length === 0}
-                title={holdings.length === 0 ? "Add an investment holding first" : ""}
+                title={
+                  holdings.length === 0 ? "Add an investment holding first" : ""
+                }
               >
                 SIP Investment
                 {holdings.length === 0 && (
@@ -447,7 +499,9 @@ export default function PortfolioPage() {
                       required
                       placeholder="e.g., HDFC Mid-Cap Opportunities Fund"
                       value={holdingForm.name}
-                      onChange={e => setHoldingForm({ ...holdingForm, name: e.target.value })}
+                      onChange={e =>
+                        setHoldingForm({ ...holdingForm, name: e.target.value })
+                      }
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -455,7 +509,9 @@ export default function PortfolioPage() {
                       <Label htmlFor="type">Type</Label>
                       <Select
                         value={holdingForm.type}
-                        onValueChange={value => setHoldingForm({ ...holdingForm, type: value })}
+                        onValueChange={value =>
+                          setHoldingForm({ ...holdingForm, type: value })
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select type" />
@@ -463,7 +519,9 @@ export default function PortfolioPage() {
                         <SelectContent>
                           {investmentTypes.map(type => (
                             <SelectItem key={type} value={type}>
-                              {type.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase())}
+                              {type
+                                .replace("_", " ")
+                                .replace(/\b\w/g, l => l.toUpperCase())}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -473,7 +531,9 @@ export default function PortfolioPage() {
                       <Label htmlFor="riskLevel">Risk Level</Label>
                       <Select
                         value={holdingForm.riskLevel}
-                        onValueChange={value => setHoldingForm({ ...holdingForm, riskLevel: value })}
+                        onValueChange={value =>
+                          setHoldingForm({ ...holdingForm, riskLevel: value })
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select risk level" />
@@ -498,11 +558,18 @@ export default function PortfolioPage() {
                         required
                         placeholder="0.0000"
                         value={holdingForm.units}
-                        onChange={e => setHoldingForm({ ...holdingForm, units: e.target.value })}
+                        onChange={e =>
+                          setHoldingForm({
+                            ...holdingForm,
+                            units: e.target.value,
+                          })
+                        }
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="currentPrice">Current Price per Unit *</Label>
+                      <Label htmlFor="currentPrice">
+                        Current Price per Unit *
+                      </Label>
                       <Input
                         id="currentPrice"
                         type="number"
@@ -510,13 +577,20 @@ export default function PortfolioPage() {
                         required
                         placeholder="0.00"
                         value={holdingForm.currentPrice}
-                        onChange={e => setHoldingForm({ ...holdingForm, currentPrice: e.target.value })}
+                        onChange={e =>
+                          setHoldingForm({
+                            ...holdingForm,
+                            currentPrice: e.target.value,
+                          })
+                        }
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="avgPurchasePrice">Average Purchase Price *</Label>
+                      <Label htmlFor="avgPurchasePrice">
+                        Average Purchase Price *
+                      </Label>
                       <Input
                         id="avgPurchasePrice"
                         type="number"
@@ -524,7 +598,12 @@ export default function PortfolioPage() {
                         required
                         placeholder="0.00"
                         value={holdingForm.avgPurchasePrice}
-                        onChange={e => setHoldingForm({ ...holdingForm, avgPurchasePrice: e.target.value })}
+                        onChange={e =>
+                          setHoldingForm({
+                            ...holdingForm,
+                            avgPurchasePrice: e.target.value,
+                          })
+                        }
                       />
                     </div>
                     <div className="space-y-2">
@@ -536,7 +615,12 @@ export default function PortfolioPage() {
                         required
                         placeholder="0.00"
                         value={holdingForm.totalInvested}
-                        onChange={e => setHoldingForm({ ...holdingForm, totalInvested: e.target.value })}
+                        onChange={e =>
+                          setHoldingForm({
+                            ...holdingForm,
+                            totalInvested: e.target.value,
+                          })
+                        }
                       />
                     </div>
                   </div>
@@ -547,7 +631,12 @@ export default function PortfolioPage() {
                         id="fundHouse"
                         placeholder="e.g., HDFC Mutual Fund"
                         value={holdingForm.fundHouse}
-                        onChange={e => setHoldingForm({ ...holdingForm, fundHouse: e.target.value })}
+                        onChange={e =>
+                          setHoldingForm({
+                            ...holdingForm,
+                            fundHouse: e.target.value,
+                          })
+                        }
                       />
                     </div>
                     <div className="space-y-2">
@@ -556,29 +645,48 @@ export default function PortfolioPage() {
                         id="category"
                         placeholder="e.g., Mid Cap, Large Cap"
                         value={holdingForm.category}
-                        onChange={e => setHoldingForm({ ...holdingForm, category: e.target.value })}
+                        onChange={e =>
+                          setHoldingForm({
+                            ...holdingForm,
+                            category: e.target.value,
+                          })
+                        }
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="firstPurchaseDate">First Purchase Date *</Label>
+                      <Label htmlFor="firstPurchaseDate">
+                        First Purchase Date *
+                      </Label>
                       <Input
                         id="firstPurchaseDate"
                         type="date"
                         required
                         value={holdingForm.firstPurchaseDate}
-                        onChange={e => setHoldingForm({ ...holdingForm, firstPurchaseDate: e.target.value })}
+                        onChange={e =>
+                          setHoldingForm({
+                            ...holdingForm,
+                            firstPurchaseDate: e.target.value,
+                          })
+                        }
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="lastPurchaseDate">Last Purchase Date *</Label>
+                      <Label htmlFor="lastPurchaseDate">
+                        Last Purchase Date *
+                      </Label>
                       <Input
                         id="lastPurchaseDate"
                         type="date"
                         required
                         value={holdingForm.lastPurchaseDate}
-                        onChange={e => setHoldingForm({ ...holdingForm, lastPurchaseDate: e.target.value })}
+                        onChange={e =>
+                          setHoldingForm({
+                            ...holdingForm,
+                            lastPurchaseDate: e.target.value,
+                          })
+                        }
                       />
                     </div>
                   </div>
@@ -586,14 +694,27 @@ export default function PortfolioPage() {
                     <div className="space-y-2">
                       <Label>Current Value</Label>
                       <Input
-                        value={formatINR(calculateCurrentValue(holdingForm.units, holdingForm.currentPrice))}
+                        value={formatINR(
+                          calculateCurrentValue(
+                            holdingForm.units,
+                            holdingForm.currentPrice
+                          )
+                        )}
                         readOnly
                       />
                     </div>
                     <div className="space-y-2">
                       <Label>Unrealized Gain/Loss</Label>
                       <Input
-                        value={formatINR(calculateUnrealizedGain(calculateCurrentValue(holdingForm.units, holdingForm.currentPrice), holdingForm.totalInvested))}
+                        value={formatINR(
+                          calculateUnrealizedGain(
+                            calculateCurrentValue(
+                              holdingForm.units,
+                              holdingForm.currentPrice
+                            ),
+                            holdingForm.totalInvested
+                          )
+                        )}
                         readOnly
                       />
                     </div>
@@ -607,7 +728,21 @@ export default function PortfolioPage() {
                           holdingForm.totalInvested
                         ).toFixed(2) + "%"}
                         readOnly
+                        className={
+                          calculateReturnPercentage(
+                            calculateUnrealizedGain(calculateCurrentValue(holdingForm.units, holdingForm.currentPrice), holdingForm.totalInvested),
+                            holdingForm.totalInvested
+                          ) > 1000 ? "border-yellow-500 bg-yellow-50" : ""
+                        }
                       />
+                      {calculateReturnPercentage(
+                        calculateUnrealizedGain(calculateCurrentValue(holdingForm.units, holdingForm.currentPrice), holdingForm.totalInvested),
+                        holdingForm.totalInvested
+                      ) > 1000 && (
+                          <p className="text-xs text-yellow-600">
+                            ⚠️ Very high return percentage. Please verify your values.
+                          </p>
+                        )}
                     </div>
                     <div className="space-y-2">
                       <Label>Holding Period</Label>
@@ -624,7 +759,8 @@ export default function PortfolioPage() {
                     <Label htmlFor="holdingId">Investment Holding *</Label>
                     {holdings.length === 0 ? (
                       <div className="text-sm text-red-600 p-2 border border-red-200 rounded">
-                        No investment holdings found. Please add an investment holding first before creating a SIP.
+                        No investment holdings found. Please add an investment
+                        holding first before creating a SIP.
                       </div>
                     ) : (
                       <Select
@@ -724,7 +860,11 @@ export default function PortfolioPage() {
               )}
 
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsAddDialogOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button type="submit">
@@ -741,20 +881,27 @@ export default function PortfolioPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Portfolio Value</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Portfolio Value
+            </CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatINR(totalPortfolioValue)}</div>
+            <div className="text-2xl font-bold">
+              {formatINR(totalPortfolioValue)}
+            </div>
             <p className="text-xs text-muted-foreground">
-              {totalReturns >= 0 ? "+" : ""}{formatINR(totalReturns)} ({totalReturnsPercentage.toFixed(2)}%)
+              {totalReturns >= 0 ? "+" : ""}
+              {formatINR(totalReturns)} ({totalReturnsPercentage.toFixed(2)}%)
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Invested</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Invested
+            </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -803,15 +950,14 @@ export default function PortfolioPage() {
         <Card>
           <CardHeader>
             <CardTitle>Investment Holdings</CardTitle>
-            <CardDescription>
-              Your current investment positions
-            </CardDescription>
+            <CardDescription>Your current investment positions</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {holdings.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  No investment holdings found. Add your first investment to get started.
+                  No investment holdings found. Add your first investment to get
+                  started.
                 </div>
               ) : (
                 holdings.map(holding => (
@@ -832,17 +978,23 @@ export default function PortfolioPage() {
                         {holding.fundHouse && `${holding.fundHouse}`}
                         {holding.category && ` • ${holding.category}`}
                         {holding.riskLevel && ` • ${holding.riskLevel}`}
-                        {holding.units && ` • ${holding.units.toFixed(4)} units`}
-                        {holding.currentPrice && ` • ₹${holding.currentPrice}/unit`}
+                        {holding.units && typeof holding.units === 'number' &&
+                          ` • ${holding.units.toFixed(4)} units`}
+                        {holding.currentPrice && typeof holding.currentPrice === 'number' &&
+                          ` • ₹${holding.currentPrice}/unit`}
                         {holding.holdingPeriod && ` • ${holding.holdingPeriod}`}
                       </p>
                     </div>
                     <div className="text-right">
-                      <div className="font-semibold">{formatINR(holding.currentValue)}</div>
+                      <div className="font-semibold">
+                        {formatINR(holding.currentValue)}
+                      </div>
                       <div
                         className={`text-sm ${holding.returns >= 0 ? "text-green-600" : "text-red-600"}`}
                       >
-                        {holding.returns >= 0 ? "+" : ""}{formatINR(holding.returns)} ({holding.returnsPercentage.toFixed(1)}%)
+                        {holding.returns >= 0 ? "+" : ""}
+                        {formatINR(holding.returns)} (
+                        {holding.returnsPercentage.toFixed(1)}%)
                       </div>
                     </div>
                     <div className="flex gap-1 ml-3">
@@ -878,15 +1030,14 @@ export default function PortfolioPage() {
         <Card>
           <CardHeader>
             <CardTitle>SIP Investments</CardTitle>
-            <CardDescription>
-              Your Systematic Investment Plans
-            </CardDescription>
+            <CardDescription>Your Systematic Investment Plans</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {sipInvestments.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  No SIP investments found. Start your first SIP to begin systematic investing.
+                  No SIP investments found. Start your first SIP to begin
+                  systematic investing.
                 </div>
               ) : (
                 sipInvestments.map(sip => (
@@ -905,12 +1056,16 @@ export default function PortfolioPage() {
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {sip.fundName && `${sip.fundName} • `}
-                        {formatINR(sip.amount)} • {sip.frequency} • Started {new Date(sip.startDate).toLocaleDateString()}
-                        {sip.nextSipDate && ` • Next: ${new Date(sip.nextSipDate).toLocaleDateString()}`}
+                        {formatINR(sip.amount)} • {sip.frequency} • Started{" "}
+                        {new Date(sip.startDate).toLocaleDateString()}
+                        {sip.nextSipDate &&
+                          ` • Next: ${new Date(sip.nextSipDate).toLocaleDateString()}`}
                       </p>
                     </div>
                     <div className="text-right">
-                      <div className="font-semibold">{formatINR(sip.totalInvested)}</div>
+                      <div className="font-semibold">
+                        {formatINR(sip.totalInvested)}
+                      </div>
                       <div className="text-sm text-muted-foreground">
                         {sip.totalUnits.toFixed(2)} units
                       </div>

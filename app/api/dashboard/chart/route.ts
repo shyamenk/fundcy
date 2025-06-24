@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { transactions } from "@/lib/db/schema"
 import { eq, and, gte, lte, desc, sql } from "drizzle-orm"
@@ -6,6 +8,15 @@ import { format, subMonths } from "date-fns"
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Authentication required" },
+        { status: 401 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const months = parseInt(searchParams.get("months") || "12")
 
@@ -17,7 +28,12 @@ export async function GET(request: NextRequest) {
     const allTransactions = await db
       .select()
       .from(transactions)
-      .where(gte(transactions.date, startDateStr))
+      .where(
+        and(
+          eq(transactions.userId, session.user.id),
+          gte(transactions.date, startDateStr)
+        )
+      )
       .orderBy(desc(transactions.date))
 
     // Group transactions by month

@@ -1,15 +1,26 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { transactions } from "@/lib/db/schema"
 import {
   transactionSchema,
   updateTransactionSchema,
 } from "@/lib/validations/transaction"
-import { eq, sql } from "drizzle-orm"
+import { eq, sql, and } from "drizzle-orm"
 
 export async function createTransaction(formData: FormData) {
+  // Get the authenticated user
+  const session = await getServerSession(authOptions)
+
+  if (!session?.user?.id) {
+    return {
+      error: "Authentication required.",
+    }
+  }
+
   const validatedFields = transactionSchema.safeParse({
     type: formData.get("type"),
     amount: formData.get("amount"),
@@ -34,11 +45,13 @@ export async function createTransaction(formData: FormData) {
       description,
       categoryId,
       date,
+      userId: session.user.id,
     })
 
     revalidatePath("/transactions")
     return { success: true }
-  } catch {
+  } catch (error) {
+    console.error("[Server Action] Database error:", error)
     return {
       error: "Database error: Failed to create transaction.",
     }
@@ -46,6 +59,15 @@ export async function createTransaction(formData: FormData) {
 }
 
 export async function updateTransaction(id: string, formData: FormData) {
+  // Get the authenticated user
+  const session = await getServerSession(authOptions)
+
+  if (!session?.user?.id) {
+    return {
+      error: "Authentication required.",
+    }
+  }
+
   const validatedFields = updateTransactionSchema.safeParse({
     type: formData.get("type"),
     amount: formData.get("amount"),
@@ -73,7 +95,12 @@ export async function updateTransaction(id: string, formData: FormData) {
   }
 
   try {
-    await db.update(transactions).set(updateData).where(eq(transactions.id, id))
+    await db
+      .update(transactions)
+      .set(updateData)
+      .where(
+        and(eq(transactions.id, id), eq(transactions.userId, session.user.id))
+      )
 
     revalidatePath("/transactions")
     revalidatePath(`/transactions/${id}`)
@@ -86,8 +113,21 @@ export async function updateTransaction(id: string, formData: FormData) {
 }
 
 export async function deleteTransaction(id: string) {
+  // Get the authenticated user
+  const session = await getServerSession(authOptions)
+
+  if (!session?.user?.id) {
+    return {
+      error: "Authentication required.",
+    }
+  }
+
   try {
-    await db.delete(transactions).where(eq(transactions.id, id))
+    await db
+      .delete(transactions)
+      .where(
+        and(eq(transactions.id, id), eq(transactions.userId, session.user.id))
+      )
     revalidatePath("/transactions")
     return { success: true }
   } catch {
@@ -98,9 +138,21 @@ export async function deleteTransaction(id: string) {
 }
 
 export async function getTransaction(id: string) {
+  // Get the authenticated user
+  const session = await getServerSession(authOptions)
+
+  if (!session?.user?.id) {
+    return {
+      error: "Authentication required.",
+    }
+  }
+
   try {
     const transaction = await db.query.transactions.findFirst({
-      where: eq(transactions.id, id),
+      where: and(
+        eq(transactions.id, id),
+        eq(transactions.userId, session.user.id)
+      ),
       with: {
         category: true,
       },
@@ -119,6 +171,15 @@ export async function getTransaction(id: string) {
 }
 
 export async function getTransactions(page: number = 1, limit: number = 10) {
+  // Get the authenticated user
+  const session = await getServerSession(authOptions)
+
+  if (!session?.user?.id) {
+    return {
+      error: "Authentication required.",
+    }
+  }
+
   try {
     const offset = (page - 1) * limit
 
@@ -126,10 +187,12 @@ export async function getTransactions(page: number = 1, limit: number = 10) {
     const totalCount = await db
       .select({ count: sql`count(*)` })
       .from(transactions)
+      .where(eq(transactions.userId, session.user.id))
     const total = Number(totalCount[0]?.count || 0)
 
     // Get paginated transactions
     const allTransactions = await db.query.transactions.findMany({
+      where: eq(transactions.userId, session.user.id),
       with: {
         category: true,
       },

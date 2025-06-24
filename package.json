@@ -17,7 +17,8 @@
     "db:studio": "drizzle-kit studio",
     "db:push": "drizzle-kit push",
     "db:seed": "tsx lib/db/seed.ts",
-    "db:seed-transactions": "tsx lib/db/seed-transactions.ts"
+    "db:seed-transactions": "tsx lib/db/seed-transactions.ts",
+    "db:seed-complete": "tsx lib/db/seed-complete.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.10.0",

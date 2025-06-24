@@ -1,19 +1,19 @@
 {
-  "version": "5",
+  "version": "7",
   "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1703123456789,
-      "tag": "0000_magenta_sir_ram",
+      "version": "7",
+      "when": 1750753030543,
+      "tag": "0000_zippy_the_executioner",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1750682302760,
-      "tag": "0001_add_investment_dates",
+      "when": 1750760508139,
+      "tag": "0001_jazzy_ken_ellis",
       "breakpoints": true
     }
   ]

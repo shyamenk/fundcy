@@ -32,6 +32,8 @@ export function TransactionFormWrapper({
   ) => {
     setIsLoading(true)
     try {
+      // Log the data being submitted
+      console.log("Submitting transaction:", data)
       // Convert FormData to the expected format
       const formData = new FormData()
       formData.append("type", data.type)

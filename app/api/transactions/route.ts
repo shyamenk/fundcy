@@ -42,6 +42,8 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
+    console.log("[API] Session:", session)
+
     if (!session?.user?.id) {
       return NextResponse.json(
         {
@@ -56,8 +58,10 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
+    console.log("[API] Incoming body:", body)
     const parsed = transactionSchema.safeParse(body)
     if (!parsed.success) {
+      console.log("[API] Validation error:", parsed.error.errors)
       return NextResponse.json(
         {
           success: false,
@@ -70,9 +74,12 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
     }
+    console.log("[API] Parsed data:", parsed.data)
     const [transaction] = await createTransaction(parsed.data, session.user.id)
+    console.log("[API] Created transaction:", transaction)
     return NextResponse.json({ success: true, data: transaction })
   } catch (error) {
+    console.error("[API] Internal error:", error)
     return NextResponse.json(
       {
         success: false,
