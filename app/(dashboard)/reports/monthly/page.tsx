@@ -23,7 +23,6 @@ import {
   TrendingUp,
   TrendingDown,
   Download,
-  Calendar,
   DollarSign,
   ArrowLeft,
   Clock,
@@ -32,7 +31,6 @@ import Link from "next/link"
 import { formatINR } from "@/lib/utils"
 import { format } from "date-fns"
 import {
-  LineChart as RechartsLineChart,
   Line,
   BarChart,
   Bar,
@@ -123,9 +121,9 @@ const COLORS = [
 export default function MonthlyReportPage() {
   const [year, setYear] = useState(new Date().getFullYear())
   const [month, setMonth] = useState(new Date().getMonth() + 1)
+  const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<MonthlyReportData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [exporting, setExporting] = useState<"pdf" | "csv" | null>(null)
 
   useEffect(() => {
@@ -145,15 +143,11 @@ export default function MonthlyReportPage() {
       } else {
         setError(result.error || "Failed to fetch monthly report")
       }
-    } catch (err) {
+    } catch {
       setError("Failed to fetch monthly report")
     } finally {
       setLoading(false)
     }
-  }
-
-  const getGrowthIcon = (value: number) => {
-    return value >= 0 ? TrendingUp : TrendingDown
   }
 
   const getGrowthColor = (value: number) => {

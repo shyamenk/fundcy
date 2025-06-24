@@ -26,7 +26,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from "recharts"
 import { useState } from "react"
 import { formatINR } from "@/lib/utils"
@@ -47,19 +46,6 @@ interface SpendingBreakdownChartProps {
 const chartTypes = [
   { value: "pie", label: "Pie Chart", icon: PieChartIcon },
   { value: "bar", label: "Bar Chart", icon: BarChart3 },
-]
-
-const COLORS = [
-  "#3b82f6", // Blue
-  "#ef4444", // Red
-  "#10b981", // Green
-  "#f59e0b", // Amber
-  "#8b5cf6", // Purple
-  "#06b6d4", // Cyan
-  "#84cc16", // Lime
-  "#f97316", // Orange
-  "#ec4899", // Pink
-  "#6366f1", // Indigo
 ]
 
 export function SpendingBreakdownChart({

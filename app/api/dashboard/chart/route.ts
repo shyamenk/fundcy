@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { transactions } from "@/lib/db/schema"
-import { eq, and, gte, lte, desc, sql } from "drizzle-orm"
+import { eq, and, gte, desc } from "drizzle-orm"
 import { format, subMonths } from "date-fns"
 
 export async function GET(request: NextRequest) {

@@ -31,7 +31,6 @@ import {
   Play,
   Target,
   Calendar,
-  DollarSign,
 } from "lucide-react"
 
 interface Goal {

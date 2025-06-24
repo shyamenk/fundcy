@@ -7,7 +7,7 @@ import { authOptions } from "@/lib/auth"
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -16,6 +16,7 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const { id } = await params
     const body = await request.json()
     const {
       amount,
@@ -39,7 +40,7 @@ export async function PUT(
       })
       .where(
         and(
-          eq(debitCardExpenses.id, params.id),
+          eq(debitCardExpenses.id, id),
           eq(debitCardExpenses.userId, session.user.id)
         )
       )
@@ -51,6 +52,7 @@ export async function PUT(
 
     return NextResponse.json(updatedExpense[0])
   } catch (error) {
+    console.error("Error updating expense:", error)
     return NextResponse.json(
       { error: "Failed to update expense" },
       { status: 500 }
@@ -60,7 +62,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -69,11 +71,12 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const { id } = await params
     const deletedExpense = await db
       .delete(debitCardExpenses)
       .where(
         and(
-          eq(debitCardExpenses.id, params.id),
+          eq(debitCardExpenses.id, id),
           eq(debitCardExpenses.userId, session.user.id)
         )
       )
@@ -85,6 +88,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
+    console.error("Error deleting expense:", error)
     return NextResponse.json(
       { error: "Failed to delete expense" },
       { status: 500 }

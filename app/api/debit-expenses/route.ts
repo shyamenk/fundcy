@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { eq } from "drizzle-orm"
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
 
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       .where(eq(debitCardExpenses.userId, session.user.id))
 
     return NextResponse.json({ expenses })
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch debit card expenses" },
       { status: 500 }
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       .returning()
 
     return NextResponse.json(newExpense[0])
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to create expense" },
       { status: 500 }

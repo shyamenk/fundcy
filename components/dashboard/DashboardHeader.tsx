@@ -12,7 +12,7 @@ export function DashboardHeader({ className }: DashboardHeaderProps) {
   const [period, setPeriod] = useState<PeriodType>("month")
   const [customDate, setCustomDate] = useState<Date>(new Date())
 
-  const { data, loading, error } = useDashboard(
+  const { loading, error } = useDashboard(
     period,
     period === "custom" ? customDate : undefined
   )

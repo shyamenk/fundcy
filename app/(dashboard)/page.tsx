@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
-import { formatINR, formatCompactINR } from "@/lib/utils"
+import { formatINR } from "@/lib/utils"
 
 export default function DashboardPage() {
   const [period, setPeriod] = useState<PeriodType>("month")
@@ -36,7 +36,7 @@ export default function DashboardPage() {
     period,
     period === "custom" ? customDate : undefined
   )
-  const { data: chartData, loading: chartLoading } = useChartData(12)
+  const { data: chartData } = useChartData(12)
 
   const handlePeriodChange = (newPeriod: PeriodType) => {
     setPeriod(newPeriod)
@@ -44,14 +44,6 @@ export default function DashboardPage() {
 
   const handleDateChange = (date: Date) => {
     setCustomDate(date)
-  }
-
-  const getGrowthIcon = (value: number) => {
-    return value >= 0 ? TrendingUp : TrendingDown
-  }
-
-  const getGrowthColor = (value: number) => {
-    return value >= 0 ? "text-green-600" : "text-red-600"
   }
 
   if (loading) {

@@ -89,12 +89,8 @@
           "name": "categories_user_id_users_id_fk",
           "tableFrom": "categories",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -179,12 +175,8 @@
           "name": "debit_card_expenses_user_id_users_id_fk",
           "tableFrom": "debit_card_expenses",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -244,12 +236,8 @@
           "name": "goal_contributions_goal_id_goals_id_fk",
           "tableFrom": "goal_contributions",
           "tableTo": "goals",
-          "columnsFrom": [
-            "goal_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["goal_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -257,12 +245,8 @@
           "name": "goal_contributions_transaction_id_transactions_id_fk",
           "tableFrom": "goal_contributions",
           "tableTo": "transactions",
-          "columnsFrom": [
-            "transaction_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["transaction_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -270,12 +254,8 @@
           "name": "goal_contributions_user_id_users_id_fk",
           "tableFrom": "goal_contributions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -375,12 +355,8 @@
           "name": "goals_user_id_users_id_fk",
           "tableFrom": "goals",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -528,12 +504,8 @@
           "name": "investment_holdings_user_id_users_id_fk",
           "tableFrom": "investment_holdings",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -646,12 +618,8 @@
           "name": "sip_investments_holding_id_investment_holdings_id_fk",
           "tableFrom": "sip_investments",
           "tableTo": "investment_holdings",
-          "columnsFrom": [
-            "holding_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["holding_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -659,12 +627,8 @@
           "name": "sip_investments_user_id_users_id_fk",
           "tableFrom": "sip_investments",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -744,12 +708,8 @@
           "name": "transactions_category_id_categories_id_fk",
           "tableFrom": "transactions",
           "tableTo": "categories",
-          "columnsFrom": [
-            "category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -757,12 +717,8 @@
           "name": "transactions_user_id_users_id_fk",
           "tableFrom": "transactions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -852,9 +808,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -866,11 +820,7 @@
     "public.goal_status": {
       "name": "goal_status",
       "schema": "public",
-      "values": [
-        "active",
-        "completed",
-        "paused"
-      ]
+      "values": ["active", "completed", "paused"]
     },
     "public.investment_type": {
       "name": "investment_type",
@@ -892,23 +842,12 @@
     "public.sip_frequency": {
       "name": "sip_frequency",
       "schema": "public",
-      "values": [
-        "daily",
-        "weekly",
-        "monthly",
-        "quarterly",
-        "yearly"
-      ]
+      "values": ["daily", "weekly", "monthly", "quarterly", "yearly"]
     },
     "public.transaction_type": {
       "name": "transaction_type",
       "schema": "public",
-      "values": [
-        "income",
-        "expense",
-        "savings",
-        "investment"
-      ]
+      "values": ["income", "expense", "savings", "investment"]
     }
   },
   "schemas": {},

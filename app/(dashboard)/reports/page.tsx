@@ -10,24 +10,17 @@ import {
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   BarChart3,
   Calendar,
   Target,
   TrendingUp,
-  FileText,
-  Download,
   ArrowRight,
   PieChart,
-  LineChart,
-  Activity,
 } from "lucide-react"
 import Link from "next/link"
 
 export default function ReportsPage() {
-  const [activeTab, setActiveTab] = useState("overview")
-
   const reportTypes = [
     {
       id: "annual",

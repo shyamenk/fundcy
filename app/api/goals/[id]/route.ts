@@ -3,12 +3,12 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { goals } from "@/lib/db/schema"
-import { goalUpdateSchema, goalCompleteSchema } from "@/lib/validations/goal"
+import { goalUpdateSchema } from "@/lib/validations/goal"
 import { eq, and } from "drizzle-orm"
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -20,10 +20,11 @@ export async function GET(
       )
     }
 
+    const { id } = await params
     const goal = await db
       .select()
       .from(goals)
-      .where(and(eq(goals.id, params.id), eq(goals.userId, session.user.id)))
+      .where(and(eq(goals.id, id), eq(goals.userId, session.user.id)))
       .limit(1)
 
     if (goal.length === 0) {
@@ -48,7 +49,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -60,8 +61,9 @@ export async function PUT(
       )
     }
 
+    const { id } = await params
     const body = await request.json()
-    const validatedData = goalUpdateSchema.parse({ ...body, id: params.id })
+    const validatedData = goalUpdateSchema.parse({ ...body, id: id })
 
     const updatedGoal = await db
       .update(goals)
@@ -75,7 +77,7 @@ export async function PUT(
         status: validatedData.status,
         updatedAt: new Date(),
       })
-      .where(and(eq(goals.id, params.id), eq(goals.userId, session.user.id)))
+      .where(and(eq(goals.id, id), eq(goals.userId, session.user.id)))
       .returning()
 
     if (updatedGoal.length === 0) {
@@ -106,7 +108,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -118,9 +120,10 @@ export async function DELETE(
       )
     }
 
+    const { id } = await params
     const deletedGoal = await db
       .delete(goals)
-      .where(and(eq(goals.id, params.id), eq(goals.userId, session.user.id)))
+      .where(and(eq(goals.id, id), eq(goals.userId, session.user.id)))
       .returning()
 
     if (deletedGoal.length === 0) {

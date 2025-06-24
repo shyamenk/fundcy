@@ -1,31 +1,26 @@
-"use client";
+"use client"
 
-import React, { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import React, { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
 import {
   User,
   Bell,
@@ -37,24 +32,24 @@ import {
   Trash2,
   Save,
   Settings as SettingsIcon,
-} from "lucide-react";
-import { useTheme } from "next-themes";
+} from "lucide-react"
+import { useTheme } from "next-themes"
 
 interface UserProfile {
-  name: string;
-  email: string;
-  image?: string;
+  name: string
+  email: string
+  image?: string
 }
 
 export default function SettingsPage() {
-  const { data: session, update } = useSession();
-  const { theme, setTheme } = useTheme();
-  const [loading, setLoading] = useState(false);
+  const { data: session, update } = useSession()
+  const { theme, setTheme } = useTheme()
+  const [loading, setLoading] = useState(false)
   const [profile, setProfile] = useState<UserProfile>({
     name: "",
     email: "",
     image: "",
-  });
+  })
 
   const [preferences, setPreferences] = useState({
     currency: "INR",
@@ -68,7 +63,7 @@ export default function SettingsPage() {
       shareAnalytics: false,
       publicProfile: false,
     },
-  });
+  })
 
   useEffect(() => {
     if (session?.user) {
@@ -76,52 +71,52 @@ export default function SettingsPage() {
         name: session.user.name || "",
         email: session.user.email || "",
         image: session.user.image || "",
-      });
+      })
     }
-  }, [session]);
+  }, [session])
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+    e.preventDefault()
+    setLoading(true)
 
     try {
       const response = await fetch("/api/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(profile),
-      });
+      })
 
       if (response.ok) {
-        await update({ name: profile.name });
-        alert("Profile updated successfully!");
+        await update({ name: profile.name })
+        alert("Profile updated successfully!")
       } else {
-        alert("Failed to update profile");
+        alert("Failed to update profile")
       }
     } catch (error) {
-      console.error("Error updating profile:", error);
-      alert("Error updating profile");
+      console.error("Error updating profile:", error)
+      alert("Error updating profile")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleExportData = async () => {
     try {
-      const response = await fetch("/api/export/all-data");
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `fundcy-data-${new Date().toISOString().split("T")[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      const response = await fetch("/api/export/all-data")
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `fundcy-data-${new Date().toISOString().split("T")[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
     } catch (error) {
-      console.error("Error exporting data:", error);
-      alert("Failed to export data");
+      console.error("Error exporting data:", error)
+      alert("Failed to export data")
     }
-  };
+  }
 
   const handleDeleteAccount = async () => {
     if (
@@ -129,25 +124,23 @@ export default function SettingsPage() {
         "Are you sure you want to delete your account? This action cannot be undone and will delete all your data."
       )
     ) {
-      const confirmDelete = prompt(
-        'Type "DELETE" to confirm account deletion:'
-      );
+      const confirmDelete = prompt('Type "DELETE" to confirm account deletion:')
       if (confirmDelete === "DELETE") {
         try {
           const response = await fetch("/api/profile", {
             method: "DELETE",
-          });
+          })
           if (response.ok) {
-            alert("Account deleted successfully");
-            window.location.href = "/auth/signin";
+            alert("Account deleted successfully")
+            window.location.href = "/auth/signin"
           }
         } catch (error) {
-          console.error("Error deleting account:", error);
-          alert("Failed to delete account");
+          console.error("Error deleting account:", error)
+          alert("Failed to delete account")
         }
       }
     }
-  };
+  }
 
   return (
     <div className="space-y-6">
@@ -171,7 +164,10 @@ export default function SettingsPage() {
             <Palette className="h-4 w-4" />
             Preferences
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-2">
+          <TabsTrigger
+            value="notifications"
+            className="flex items-center gap-2"
+          >
             <Bell className="h-4 w-4" />
             Notifications
           </TabsTrigger>
@@ -200,7 +196,7 @@ export default function SettingsPage() {
                   <Input
                     id="name"
                     value={profile.name}
-                    onChange={(e) =>
+                    onChange={e =>
                       setProfile({ ...profile, name: e.target.value })
                     }
                     placeholder="Enter your full name"
@@ -224,13 +220,17 @@ export default function SettingsPage() {
                   <Input
                     id="image"
                     value={profile.image}
-                    onChange={(e) =>
+                    onChange={e =>
                       setProfile({ ...profile, image: e.target.value })
                     }
                     placeholder="https://example.com/profile.jpg"
                   />
                 </div>
-                <Button type="submit" disabled={loading} className="flex items-center gap-2">
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="flex items-center gap-2"
+                >
                   <Save className="h-4 w-4" />
                   {loading ? "Updating..." : "Update Profile"}
                 </Button>
@@ -265,7 +265,7 @@ export default function SettingsPage() {
                 <Label>Currency</Label>
                 <Select
                   value={preferences.currency}
-                  onValueChange={(value) =>
+                  onValueChange={value =>
                     setPreferences({ ...preferences, currency: value })
                   }
                 >
@@ -284,7 +284,7 @@ export default function SettingsPage() {
                 <Label>Date Format</Label>
                 <Select
                   value={preferences.dateFormat}
-                  onValueChange={(value) =>
+                  onValueChange={value =>
                     setPreferences({ ...preferences, dateFormat: value })
                   }
                 >
@@ -318,8 +318,16 @@ export default function SettingsPage() {
                     Get reminded about your financial goals
                   </p>
                 </div>
-                <Badge variant={preferences.notifications.goalReminders ? "default" : "secondary"}>
-                  {preferences.notifications.goalReminders ? "Enabled" : "Disabled"}
+                <Badge
+                  variant={
+                    preferences.notifications.goalReminders
+                      ? "default"
+                      : "secondary"
+                  }
+                >
+                  {preferences.notifications.goalReminders
+                    ? "Enabled"
+                    : "Disabled"}
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
@@ -329,8 +337,16 @@ export default function SettingsPage() {
                     Receive monthly spending and investment reports
                   </p>
                 </div>
-                <Badge variant={preferences.notifications.monthlyReports ? "default" : "secondary"}>
-                  {preferences.notifications.monthlyReports ? "Enabled" : "Disabled"}
+                <Badge
+                  variant={
+                    preferences.notifications.monthlyReports
+                      ? "default"
+                      : "secondary"
+                  }
+                >
+                  {preferences.notifications.monthlyReports
+                    ? "Enabled"
+                    : "Disabled"}
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
@@ -340,8 +356,16 @@ export default function SettingsPage() {
                     Get notified when you exceed spending limits
                   </p>
                 </div>
-                <Badge variant={preferences.notifications.expenseAlerts ? "default" : "secondary"}>
-                  {preferences.notifications.expenseAlerts ? "Enabled" : "Disabled"}
+                <Badge
+                  variant={
+                    preferences.notifications.expenseAlerts
+                      ? "default"
+                      : "secondary"
+                  }
+                >
+                  {preferences.notifications.expenseAlerts
+                    ? "Enabled"
+                    : "Disabled"}
                 </Badge>
               </div>
             </CardContent>
@@ -364,7 +388,11 @@ export default function SettingsPage() {
                     Download all your financial data as JSON
                   </p>
                 </div>
-                <Button variant="outline" onClick={handleExportData} className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handleExportData}
+                  className="flex items-center gap-2"
+                >
                   <Download className="h-4 w-4" />
                   Export
                 </Button>
@@ -376,7 +404,11 @@ export default function SettingsPage() {
                     Import financial data from a backup file
                   </p>
                 </div>
-                <Button variant="outline" disabled className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  disabled
+                  className="flex items-center gap-2"
+                >
                   <Upload className="h-4 w-4" />
                   Import (Coming Soon)
                 </Button>
@@ -418,7 +450,9 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/10">
                 <div>
-                  <p className="font-medium text-red-700 dark:text-red-400">Delete Account</p>
+                  <p className="font-medium text-red-700 dark:text-red-400">
+                    Delete Account
+                  </p>
                   <p className="text-sm text-red-600 dark:text-red-500">
                     Permanently delete your account and all data
                   </p>
@@ -437,5 +471,5 @@ export default function SettingsPage() {
         </TabsContent>
       </Tabs>
     </div>
-  );
-} 
+  )
+}

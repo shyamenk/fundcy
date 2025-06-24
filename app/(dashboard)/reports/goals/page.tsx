@@ -19,17 +19,11 @@ import {
 } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
-  BarChart3,
   TrendingUp,
-  TrendingDown,
   Download,
-  Calendar,
   DollarSign,
   ArrowLeft,
-  PieChart,
   Target,
-  Clock,
-  Activity,
   CheckCircle,
   AlertCircle,
   Pause,
@@ -39,8 +33,6 @@ import Link from "next/link"
 import { formatINR } from "@/lib/utils"
 import { format } from "date-fns"
 import {
-  LineChart as RechartsLineChart,
-  Line,
   BarChart,
   Bar,
   PieChart as RechartsPieChart,
@@ -165,7 +157,7 @@ export default function GoalsReportPage() {
       } else {
         setError(result.error || "Failed to fetch goals report")
       }
-    } catch (err) {
+    } catch {
       setError("Failed to fetch goals report")
     } finally {
       setLoading(false)

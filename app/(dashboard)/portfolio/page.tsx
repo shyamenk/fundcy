@@ -1,23 +1,23 @@
-"use client";
+"use client"
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select"
 import {
   Dialog,
   DialogContent,
@@ -26,8 +26,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
 import {
   Plus,
   TrendingUp,
@@ -37,45 +37,45 @@ import {
   Edit,
   Trash2,
   Loader2,
-} from "lucide-react";
-import { formatINR } from "@/lib/utils";
+} from "lucide-react"
+import { formatINR } from "@/lib/utils"
 
 interface InvestmentHolding {
-  id: string;
-  name: string;
-  type: string;
-  units?: number;
-  currentPrice?: number;
-  avgPurchasePrice?: number;
-  currentValue: number;
-  totalInvested: number;
-  returns: number;
-  returnsPercentage: number;
-  firstPurchaseDate?: string;
-  lastPurchaseDate?: string;
-  holdingPeriod?: string;
-  fundHouse?: string;
-  category?: string;
-  riskLevel?: string;
+  id: string
+  name: string
+  type: string
+  units?: number
+  currentPrice?: number
+  avgPurchasePrice?: number
+  currentValue: number
+  totalInvested: number
+  returns: number
+  returnsPercentage: number
+  firstPurchaseDate?: string
+  lastPurchaseDate?: string
+  holdingPeriod?: string
+  fundHouse?: string
+  category?: string
+  riskLevel?: string
 }
 
 interface SIPInvestment {
-  id: string;
-  holdingId: string;
-  amount: number;
-  frequency: string;
-  startDate: string;
-  nextSipDate?: string;
-  isActive: boolean;
-  totalInvested: number;
-  totalUnits: number;
-  fundName?: string;
-  holding: InvestmentHolding;
+  id: string
+  holdingId: string
+  amount: number
+  frequency: string
+  startDate: string
+  nextSipDate?: string
+  isActive: boolean
+  totalInvested: number
+  totalUnits: number
+  fundName?: string
+  holding: InvestmentHolding
 }
 
 interface EditingItem {
-  type: "holding" | "sip";
-  data: InvestmentHolding | SIPInvestment;
+  type: "holding" | "sip"
+  data: InvestmentHolding | SIPInvestment
 }
 
 const investmentTypes = [
@@ -90,21 +90,21 @@ const investmentTypes = [
   "cryptocurrency",
   "real_estate",
   "other",
-];
+]
 
-const sipFrequencies = ["daily", "weekly", "monthly", "quarterly", "yearly"];
+const sipFrequencies = ["daily", "weekly", "monthly", "quarterly", "yearly"]
 
-const riskLevels = ["Low", "Moderate", "High"];
+const riskLevels = ["Low", "Moderate", "High"]
 
 export default function PortfolioPage() {
-  const [holdings, setHoldings] = useState<InvestmentHolding[]>([]);
-  const [sipInvestments, setSipInvestments] = useState<SIPInvestment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
-  const [isDeleting, setIsDeleting] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"holding" | "sip">("holding");
+  const [holdings, setHoldings] = useState<InvestmentHolding[]>([])
+  const [sipInvestments, setSipInvestments] = useState<SIPInvestment[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editingItem, setEditingItem] = useState<EditingItem | null>(null)
+  const [isDeleting, setIsDeleting] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<"holding" | "sip">("holding")
 
   const [holdingForm, setHoldingForm] = useState({
     name: "",
@@ -118,7 +118,7 @@ export default function PortfolioPage() {
     fundHouse: "",
     category: "",
     riskLevel: "",
-  });
+  })
 
   const [sipForm, setSipForm] = useState({
     holdingId: "",
@@ -128,16 +128,16 @@ export default function PortfolioPage() {
     nextSipDate: new Date().toISOString().slice(0, 10),
     isActive: true,
     fundName: "",
-  });
+  })
 
   useEffect(() => {
-    fetchPortfolioData();
-  }, []);
+    fetchPortfolioData()
+  }, [])
 
   const fetchPortfolioData = async () => {
     try {
-      const response = await fetch("/api/dashboard/portfolio");
-      const data = await response.json();
+      const response = await fetch("/api/dashboard/portfolio")
+      const data = await response.json()
 
       // Convert string values to numbers for calculations
       const processedHoldings = (data.holdings || []).map(
@@ -148,10 +148,14 @@ export default function PortfolioPage() {
           returns: parseFloat(String(holding.returns)),
           returnsPercentage: parseFloat(String(holding.returnsPercentage)),
           units: holding.units ? parseFloat(String(holding.units)) : undefined,
-          currentPrice: holding.currentPrice ? parseFloat(String(holding.currentPrice)) : undefined,
-          avgPurchasePrice: holding.avgPurchasePrice ? parseFloat(String(holding.avgPurchasePrice)) : undefined,
+          currentPrice: holding.currentPrice
+            ? parseFloat(String(holding.currentPrice))
+            : undefined,
+          avgPurchasePrice: holding.avgPurchasePrice
+            ? parseFloat(String(holding.avgPurchasePrice))
+            : undefined,
         })
-      );
+      )
 
       const processedSIPs = (data.sips || []).map((sip: SIPInvestment) => ({
         ...sip,
@@ -161,77 +165,77 @@ export default function PortfolioPage() {
         holding: processedHoldings.find(
           (h: InvestmentHolding) => h.id === sip.holdingId
         ),
-      }));
+      }))
 
-      setHoldings(processedHoldings);
-      setSipInvestments(processedSIPs);
+      setHoldings(processedHoldings)
+      setSipInvestments(processedSIPs)
     } catch (error) {
-      console.error("Error fetching portfolio data:", error);
+      console.error("Error fetching portfolio data:", error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const totalPortfolioValue = holdings.reduce(
     (sum, holding) => sum + holding.currentValue,
     0
-  );
+  )
   const totalInvested = holdings.reduce(
     (sum, holding) => sum + holding.totalInvested,
     0
-  );
+  )
   const totalReturns = holdings.reduce(
     (sum, holding) => sum + holding.returns,
     0
-  );
+  )
   const totalReturnsPercentage =
-    totalInvested > 0 ? (totalReturns / totalInvested) * 100 : 0;
+    totalInvested > 0 ? (totalReturns / totalInvested) * 100 : 0
 
-  const activeSIPs = sipInvestments.filter(sip => sip.isActive);
-  const totalSIPAmount = activeSIPs.reduce((sum, sip) => sum + sip.amount, 0);
+  const activeSIPs = sipInvestments.filter(sip => sip.isActive)
+  const totalSIPAmount = activeSIPs.reduce((sum, sip) => sum + sip.amount, 0)
 
   const calculateCurrentValue = (units: string, currentPrice: string) => {
-    const u = parseFloat(units || "0");
-    const p = parseFloat(currentPrice || "0");
-    return u * p;
-  };
+    const u = parseFloat(units || "0")
+    const p = parseFloat(currentPrice || "0")
+    return u * p
+  }
 
   const calculateUnrealizedGain = (
     currentValue: number,
     totalInvested: string
   ) => {
-    return currentValue - parseFloat(totalInvested || "0");
-  };
+    return currentValue - parseFloat(totalInvested || "0")
+  }
 
   const calculateReturnPercentage = (gain: number, totalInvested: string) => {
-    const invested = parseFloat(totalInvested || "0");
-    return invested > 0 ? (gain / invested) * 100 : 0;
-  };
+    const invested = parseFloat(totalInvested || "0")
+    return invested > 0 ? (gain / invested) * 100 : 0
+  }
 
   const calculateHoldingPeriod = (first: string, last: string) => {
-    if (!first || !last) return "";
-    const d1 = new Date(first);
-    const d2 = new Date(last);
+    if (!first || !last) return ""
+    const d1 = new Date(first)
+    const d2 = new Date(last)
     const months =
       (d2.getFullYear() - d1.getFullYear()) * 12 +
-      (d2.getMonth() - d1.getMonth());
-    if (months < 0) return "";
-    if (months < 12) return `${months} month${months !== 1 ? "s" : ""}`;
-    const years = Math.floor(months / 12);
-    const remMonths = months % 12;
-    return `${years} year${years !== 1 ? "s" : ""}${remMonths ? ` ${remMonths} month${remMonths !== 1 ? "s" : ""}` : ""}`;
-  };
+      (d2.getMonth() - d1.getMonth())
+    if (months < 0) return ""
+    if (months < 12) return `${months} month${months !== 1 ? "s" : ""}`
+    const years = Math.floor(months / 12)
+    const remMonths = months % 12
+    return `${years} year${years !== 1 ? "s" : ""}${remMonths ? ` ${remMonths} month${remMonths !== 1 ? "s" : ""}` : ""}`
+  }
 
   const handleAddInvestment = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     try {
       const url = isEditing
         ? `/api/dashboard/portfolio/${editingItem?.data.id}`
-        : "/api/dashboard/portfolio";
-      const method = isEditing ? "PUT" : "POST";
+        : "/api/dashboard/portfolio"
+      const method = isEditing ? "PUT" : "POST"
 
-      let payload;
+      let payload
       if (activeTab === "holding") {
         // Validate holding form
         if (
@@ -245,25 +249,25 @@ export default function PortfolioPage() {
         ) {
           alert(
             "Please fill in all required fields for the investment holding."
-          );
-          return;
+          )
+          return
         }
         const currentValue = calculateCurrentValue(
           holdingForm.units,
           holdingForm.currentPrice
-        );
+        )
         const unrealizedGain = calculateUnrealizedGain(
           currentValue,
           holdingForm.totalInvested
-        );
+        )
         const returnPercentage = calculateReturnPercentage(
           unrealizedGain,
           holdingForm.totalInvested
-        );
+        )
         const holdingPeriod = calculateHoldingPeriod(
           holdingForm.firstPurchaseDate,
           holdingForm.lastPurchaseDate
-        );
+        )
         payload = {
           ...holdingForm,
           units: parseFloat(holdingForm.units || "0"),
@@ -276,12 +280,12 @@ export default function PortfolioPage() {
           lastPurchaseDate: holdingForm.lastPurchaseDate,
           totalInvested: parseFloat(holdingForm.totalInvested || "0"),
           operationType: activeTab,
-        };
+        }
       } else {
         // Validate SIP form
         if (holdings.length === 0) {
-          alert("Please add an investment holding first before creating a SIP.");
-          return;
+          alert("Please add an investment holding first before creating a SIP.")
+          return
         }
         if (
           !sipForm.holdingId ||
@@ -289,8 +293,8 @@ export default function PortfolioPage() {
           !sipForm.frequency ||
           !sipForm.startDate
         ) {
-          alert("Please fill in all required fields for the SIP investment.");
-          return;
+          alert("Please fill in all required fields for the SIP investment.")
+          return
         }
 
         payload = {
@@ -298,48 +302,48 @@ export default function PortfolioPage() {
           amount: parseFloat(sipForm.amount || "0"),
           nextSipDate: sipForm.nextSipDate,
           operationType: activeTab,
-        };
+        }
       }
 
-      console.log("Submitting payload:", payload); // Debug log
+      console.log("Submitting payload:", payload) // Debug log
 
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      });
+      })
 
       if (response.ok) {
-        fetchPortfolioData();
-        setIsAddDialogOpen(false);
-        setIsEditing(false);
-        setEditingItem(null);
-        resetForms();
+        fetchPortfolioData()
+        setIsAddDialogOpen(false)
+        setIsEditing(false)
+        setEditingItem(null)
+        resetForms()
       } else {
-        const errorData = await response.json();
-        console.error("Error response:", errorData);
+        const errorData = await response.json()
+        console.error("Error response:", errorData)
         alert(
           `Failed to ${isEditing ? "update" : "create"} investment: ${errorData.error}`
-        );
+        )
       }
     } catch (error) {
-      console.error("Error saving investment:", error);
+      console.error("Error saving investment:", error)
       alert(
         `Error saving investment: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
+      )
     }
-  };
+  }
 
   const handleEdit = (
     type: "holding" | "sip",
     item: InvestmentHolding | SIPInvestment
   ) => {
-    setIsEditing(true);
-    setEditingItem({ type, data: item });
-    setActiveTab(type);
+    setIsEditing(true)
+    setEditingItem({ type, data: item })
+    setActiveTab(type)
 
     if (type === "holding") {
-      const holding = item as InvestmentHolding;
+      const holding = item as InvestmentHolding
       setHoldingForm({
         name: holding.name,
         type: holding.type,
@@ -352,9 +356,9 @@ export default function PortfolioPage() {
         fundHouse: holding.fundHouse || "",
         category: holding.category || "",
         riskLevel: holding.riskLevel || "",
-      });
+      })
     } else {
-      const sip = item as SIPInvestment;
+      const sip = item as SIPInvestment
       setSipForm({
         holdingId: sip.holdingId,
         amount: sip.amount?.toString() || "",
@@ -363,33 +367,33 @@ export default function PortfolioPage() {
         nextSipDate: sip.nextSipDate || new Date().toISOString().slice(0, 10),
         isActive: sip.isActive || true,
         fundName: sip.fundName || "",
-      });
+      })
     }
 
-    setIsAddDialogOpen(true);
-  };
+    setIsAddDialogOpen(true)
+  }
 
   const handleDelete = async (type: "holding" | "sip", id: string) => {
-    if (!confirm(`Are you sure you want to delete this ${type}?`)) return;
+    if (!confirm(`Are you sure you want to delete this ${type}?`)) return
 
-    setIsDeleting(id);
+    setIsDeleting(id)
     try {
       const response = await fetch(
         `/api/dashboard/portfolio/${id}?operationType=${type}`,
         {
           method: "DELETE",
         }
-      );
+      )
 
       if (response.ok) {
-        fetchPortfolioData();
+        fetchPortfolioData()
       }
     } catch (error) {
-      console.error("Error deleting investment:", error);
+      console.error("Error deleting investment:", error)
     } finally {
-      setIsDeleting(null);
+      setIsDeleting(null)
     }
-  };
+  }
 
   const resetForms = () => {
     setHoldingForm({
@@ -404,7 +408,7 @@ export default function PortfolioPage() {
       fundHouse: "",
       category: "",
       riskLevel: "",
-    });
+    })
     setSipForm({
       holdingId: "",
       amount: "",
@@ -413,15 +417,15 @@ export default function PortfolioPage() {
       nextSipDate: new Date().toISOString().slice(0, 10),
       isActive: true,
       fundName: "",
-    });
-  };
+    })
+  }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-lg">Loading portfolio...</div>
       </div>
-    );
+    )
   }
 
   return (
@@ -439,9 +443,9 @@ export default function PortfolioPage() {
           <DialogTrigger asChild>
             <Button
               onClick={() => {
-                setIsEditing(false);
-                setEditingItem(null);
-                resetForms();
+                setIsEditing(false)
+                setEditingItem(null)
+                resetForms()
               }}
             >
               <Plus className="mr-2 h-4 w-4" />
@@ -723,31 +727,57 @@ export default function PortfolioPage() {
                     <div className="space-y-2">
                       <Label>Return Percentage</Label>
                       <Input
-                        value={calculateReturnPercentage(
-                          calculateUnrealizedGain(calculateCurrentValue(holdingForm.units, holdingForm.currentPrice), holdingForm.totalInvested),
-                          holdingForm.totalInvested
-                        ).toFixed(2) + "%"}
+                        value={
+                          calculateReturnPercentage(
+                            calculateUnrealizedGain(
+                              calculateCurrentValue(
+                                holdingForm.units,
+                                holdingForm.currentPrice
+                              ),
+                              holdingForm.totalInvested
+                            ),
+                            holdingForm.totalInvested
+                          ).toFixed(2) + "%"
+                        }
                         readOnly
                         className={
                           calculateReturnPercentage(
-                            calculateUnrealizedGain(calculateCurrentValue(holdingForm.units, holdingForm.currentPrice), holdingForm.totalInvested),
+                            calculateUnrealizedGain(
+                              calculateCurrentValue(
+                                holdingForm.units,
+                                holdingForm.currentPrice
+                              ),
+                              holdingForm.totalInvested
+                            ),
                             holdingForm.totalInvested
-                          ) > 1000 ? "border-yellow-500 bg-yellow-50" : ""
+                          ) > 1000
+                            ? "border-yellow-500 bg-yellow-50"
+                            : ""
                         }
                       />
                       {calculateReturnPercentage(
-                        calculateUnrealizedGain(calculateCurrentValue(holdingForm.units, holdingForm.currentPrice), holdingForm.totalInvested),
+                        calculateUnrealizedGain(
+                          calculateCurrentValue(
+                            holdingForm.units,
+                            holdingForm.currentPrice
+                          ),
+                          holdingForm.totalInvested
+                        ),
                         holdingForm.totalInvested
                       ) > 1000 && (
-                          <p className="text-xs text-yellow-600">
-                            ⚠️ Very high return percentage. Please verify your values.
-                          </p>
-                        )}
+                        <p className="text-xs text-yellow-600">
+                          ⚠️ Very high return percentage. Please verify your
+                          values.
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label>Holding Period</Label>
                       <Input
-                        value={calculateHoldingPeriod(holdingForm.firstPurchaseDate, holdingForm.lastPurchaseDate)}
+                        value={calculateHoldingPeriod(
+                          holdingForm.firstPurchaseDate,
+                          holdingForm.lastPurchaseDate
+                        )}
                         readOnly
                       />
                     </div>
@@ -978,9 +1008,11 @@ export default function PortfolioPage() {
                         {holding.fundHouse && `${holding.fundHouse}`}
                         {holding.category && ` • ${holding.category}`}
                         {holding.riskLevel && ` • ${holding.riskLevel}`}
-                        {holding.units && typeof holding.units === 'number' &&
+                        {holding.units &&
+                          typeof holding.units === "number" &&
                           ` • ${holding.units.toFixed(4)} units`}
-                        {holding.currentPrice && typeof holding.currentPrice === 'number' &&
+                        {holding.currentPrice &&
+                          typeof holding.currentPrice === "number" &&
                           ` • ₹${holding.currentPrice}/unit`}
                         {holding.holdingPeriod && ` • ${holding.holdingPeriod}`}
                       </p>
@@ -1100,5 +1132,5 @@ export default function PortfolioPage() {
         </Card>
       </div>
     </div>
-  );
+  )
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/card"
 import { Landmark } from "lucide-react"
 
-export default function SignInPage() {
+function SignInForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -97,7 +97,7 @@ export default function SignInPage() {
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/auth/signup" className="text-primary hover:underline">
               Sign up
             </Link>
@@ -105,5 +105,23 @@ export default function SignInPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <Card className="w-full max-w-md">
+            <CardContent className="flex items-center justify-center p-6">
+              <div className="text-muted-foreground">Loading...</div>
+            </CardContent>
+          </Card>
+        </div>
+      }
+    >
+      <SignInForm />
+    </Suspense>
   )
 }

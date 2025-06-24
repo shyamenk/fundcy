@@ -70,15 +70,17 @@ export async function POST(request: NextRequest) {
       const totalInvested = parseFloat(data.totalInvested || "0")
       const currentValue = units * currentPrice
       const returns = currentValue - totalInvested
-      const returnsPercentage = totalInvested > 0 ? (returns / totalInvested) * 100 : 0
+      const returnsPercentage =
+        totalInvested > 0 ? (returns / totalInvested) * 100 : 0
 
       // Validate reasonable values
       if (returnsPercentage > 10000) {
         return NextResponse.json(
-          { 
-            error: "Return percentage seems unusually high. Please verify your values.", 
-            details: `Calculated return: ${returnsPercentage.toFixed(2)}%` 
-          }, 
+          {
+            error:
+              "Return percentage seems unusually high. Please verify your values.",
+            details: `Calculated return: ${returnsPercentage.toFixed(2)}%`,
+          },
           { status: 400 }
         )
       }

@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import {
   Select,
   SelectContent,
@@ -25,9 +24,6 @@ import {
   Download,
   Calendar,
   DollarSign,
-  Target,
-  PieChart,
-  LineChart,
   ArrowLeft,
 } from "lucide-react"
 import Link from "next/link"
@@ -120,15 +116,11 @@ export default function AnnualReportPage() {
       } else {
         setError(result.error || "Failed to fetch annual report")
       }
-    } catch (err) {
+    } catch {
       setError("Failed to fetch annual report")
     } finally {
       setLoading(false)
     }
-  }
-
-  const getGrowthIcon = (value: number) => {
-    return value >= 0 ? TrendingUp : TrendingDown
   }
 
   const getGrowthColor = (value: number) => {

@@ -17,10 +17,7 @@ export async function PUT(request: NextRequest) {
 
     // Validate input
     if (!name) {
-      return NextResponse.json(
-        { error: "Name is required" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Name is required" }, { status: 400 })
     }
 
     // Update user
@@ -64,9 +61,7 @@ export async function DELETE() {
     }
 
     // Delete user (cascade will handle related records)
-    await db
-      .delete(users)
-      .where(eq(users.email, session.user.email))
+    await db.delete(users).where(eq(users.email, session.user.email))
 
     return NextResponse.json(
       { message: "Account deleted successfully" },

@@ -17,11 +17,7 @@ export function exportToCSV(
   transactions: Transaction[],
   options: ExportOptions
 ): void {
-  const {
-    month,
-    includeCategories = true,
-    includeDescriptions = true,
-  } = options
+  const { month, includeDescriptions = true } = options
 
   // Filter transactions for the specified month
   const monthTransactions = transactions.filter(t => {
